@@ -798,16 +798,16 @@ tgl.addEventListener('click', () => {
 });
 
 /* ── SMOOTH SCROLL ── */
-function scrollTo(to, ms) {
+function smoothNavScroll(to, ms) {
   const from = window.scrollY, diff = to - from; let t0 = null;
   const ease = t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2;
-  (function s(ts) { if(!t0) t0=ts; const p=Math.min((ts-t0)/ms,1); window.scrollTo(0,from+diff*ease(p)); if(p<1) requestAnimationFrame(s); })(performance.now());
+  (function step(ts) { if(!t0) t0=ts; const p=Math.min((ts-t0)/ms,1); window.scrollTo(0,from+diff*ease(p)); if(p<1) requestAnimationFrame(step); })(performance.now());
 }
-document.querySelectorAll('.nav-links a[href^="#"]').forEach(a => {
+document.querySelectorAll('.nav-links a[href^="#"], .hero-btns a[href^="#"]').forEach(a => {
   a.addEventListener('click', e => {
     e.preventDefault();
-    const t = document.querySelector(a.getAttribute('href'));
-    if(t) scrollTo(t.getBoundingClientRect().top + window.scrollY - 68, 900);
+    const target = document.querySelector(a.getAttribute('href'));
+    if(target) smoothNavScroll(target.getBoundingClientRect().top + window.scrollY - 68, 900);
   });
 });
 
