@@ -7,537 +7,286 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-
-    /* ════════════════════════════════
-       LIGHT THEME (default)
-    ════════════════════════════════ */
     :root {
-      --accent:       #0077cc;
-      --accent-dim:   #005fa3;
-      --accent-pale:  rgba(0,119,204,0.09);
-      --accent-bdr:   rgba(0,119,204,0.28);
-      --gold:         #a05800;
-      --gold-pale:    rgba(160,88,0,0.09);
-      --red:          #c41f3b;
-      --red-pale:     rgba(196,31,59,0.08);
-      --green:        #006e45;
-      --green-pale:   rgba(0,110,69,0.09);
-      --bg:           #f4f7fb;
-      --bg-card:      #ffffff;
-      --bg-alt:       #edf1f7;
-      --border:       #cdd5e0;
-      --text:         #0c1821;
-      --text-2:       #374f63;
-      --text-3:       #637d93;
-      --nav-bg:       rgba(244,247,251,0.95);
+      --accent:#0077cc; --accent-dim:#005fa3; --accent-pale:rgba(0,119,204,0.09); --accent-bdr:rgba(0,119,204,0.28);
+      --gold:#a05800; --gold-pale:rgba(160,88,0,0.09); --gold-bdr:rgba(160,88,0,0.28);
+      --red:#c41f3b; --red-pale:rgba(196,31,59,0.08); --red-bdr:rgba(196,31,59,0.28);
+      --green:#006e45; --green-pale:rgba(0,110,69,0.09); --green-bdr:rgba(0,110,69,0.28);
+      --purple:#6d28d9; --purple-pale:rgba(109,40,217,0.08);
+      --bg:#f4f7fb; --bg-card:#ffffff; --bg-alt:#edf1f7;
+      --border:#cdd5e0; --text:#0c1821; --text-2:#374f63; --text-3:#637d93;
+      --nav-bg:rgba(244,247,251,0.95);
+      --sh-card:0 2px 14px rgba(0,0,0,.05); --sh-card-h:0 6px 24px rgba(0,119,204,.10);
     }
-
-    /* ════════════════════════════════
-       DARK THEME
-    ════════════════════════════════ */
     html.dark {
-      --accent:       #38bdf8;
-      --accent-dim:   #0ea5e9;
-      --accent-pale:  rgba(56,189,248,0.10);
-      --accent-bdr:   rgba(56,189,248,0.32);
-      --gold:         #f59e0b;
-      --gold-pale:    rgba(245,158,11,0.10);
-      --red:          #f43f5e;
-      --red-pale:     rgba(244,63,94,0.08);
-      --green:        #34d399;
-      --green-pale:   rgba(52,211,153,0.10);
-      --bg:           #070e1a;
-      --bg-card:      #0c1628;
-      --bg-alt:       #0a1220;
-      --border:       rgba(56,189,248,0.14);
-      --text:         #dde8f4;
-      --text-2:       #8aaabf;
-      --text-3:       #506a7e;
-      --nav-bg:       rgba(7,14,26,0.93);
+      --accent:#38bdf8; --accent-dim:#0ea5e9; --accent-pale:rgba(56,189,248,0.10); --accent-bdr:rgba(56,189,248,0.32);
+      --gold:#f59e0b; --gold-pale:rgba(245,158,11,0.10); --gold-bdr:rgba(245,158,11,0.32);
+      --red:#f43f5e; --red-pale:rgba(244,63,94,0.08); --red-bdr:rgba(244,63,94,0.28);
+      --green:#34d399; --green-pale:rgba(52,211,153,0.10); --green-bdr:rgba(52,211,153,0.28);
+      --purple:#a78bfa; --purple-pale:rgba(167,139,250,0.08);
+      --bg:#070e1a; --bg-card:#0c1628; --bg-alt:#0a1220;
+      --border:rgba(56,189,248,0.14); --text:#dde8f4; --text-2:#8aaabf; --text-3:#506a7e;
+      --nav-bg:rgba(7,14,26,0.93);
+      --sh-card:0 2px 14px rgba(0,0,0,.22); --sh-card-h:0 6px 24px rgba(56,189,248,.10);
     }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;font-size:16px;line-height:1.75;overflow-x:hidden;transition:background .35s,color .35s;}
+    #bg-canvas{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;}
 
-    /* ════════════════════════════════
-       BASE
-    ════════════════════════════════ */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
+    /* ── NAV ── */
+    nav{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 40px;background:var(--nav-bg);backdrop-filter:blur(18px) saturate(160%);border-bottom:1px solid var(--border);transition:background .35s,border-color .35s;}
+    .nav-logo{font-family:'Orbitron',monospace;font-size:.95rem;font-weight:800;color:var(--accent);text-decoration:none;letter-spacing:.07em;}
+    .nav-logo em{color:var(--gold);font-style:normal;}
+    .nav-links{display:flex;gap:24px;}
+    .nav-links a{font-size:.8rem;font-weight:500;color:var(--text-2);text-decoration:none;letter-spacing:.01em;position:relative;padding-bottom:2px;transition:color .18s;}
+    .nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:2px;background:var(--accent);border-radius:2px;transform:scaleX(0);transition:transform .2s;}
+    .nav-links a:hover{color:var(--accent);} .nav-links a:hover::after{transform:scaleX(1);}
+    .nav-right{display:flex;align-items:center;gap:12px;}
+    .theme-toggle{display:flex;align-items:center;gap:7px;cursor:pointer;padding:5px 11px;border-radius:6px;border:1px solid var(--border);background:transparent;user-select:none;transition:border-color .18s,background .18s;}
+    .theme-toggle:hover{border-color:var(--accent);background:var(--accent-pale);}
+    .t-track{width:32px;height:17px;border-radius:9px;border:1.5px solid var(--accent);position:relative;background:var(--accent-pale);flex-shrink:0;}
+    .t-thumb{width:11px;height:11px;border-radius:50%;background:var(--accent);position:absolute;top:1px;left:1px;transition:transform .3s;}
+    html.dark .t-thumb{transform:translateX(15px);}
+    .t-label{font-size:.72rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-2);min-width:30px;}
+    .nav-cta{font-size:.8rem;font-weight:600;color:#fff;background:var(--accent);padding:7px 18px;border-radius:6px;text-decoration:none;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.14);transition:background .18s,transform .15s;}
+    .nav-cta:hover{background:var(--accent-dim);transform:translateY(-1px);}
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      font-size: 16px;
-      line-height: 1.75;
-      overflow-x: hidden;
-      transition: background .35s, color .35s;
-    }
+    /* ── LAYOUT ── */
+    .wrap{position:relative;z-index:2;max-width:1080px;margin:0 auto;padding:0 40px;}
+    section{padding:88px 0;}
+    .divider{height:1px;background:var(--border);position:relative;z-index:2;}
 
-    /* ════════════════════════════════
-       CANVAS
-    ════════════════════════════════ */
-    #bg-canvas {
-      position: fixed; inset: 0; width: 100%; height: 100%;
-      z-index: 0; pointer-events: none;
-    }
+    /* ── TYPE ── */
+    .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;}
+    .eyebrow::before{content:'';width:16px;height:1.5px;background:var(--accent);border-radius:1px;}
+    h1,h2{font-family:'Orbitron',monospace;font-weight:800;line-height:1.12;color:var(--text);}
+    h3{font-family:'Inter',sans-serif;font-weight:700;color:var(--text);}
+    p{color:var(--text-2);}
+    p strong{color:var(--text);font-weight:600;}
+    .mono{font-family:'JetBrains Mono',monospace;font-size:.82em;background:var(--accent-pale);color:var(--accent);padding:2px 6px;border-radius:4px;border:1px solid var(--accent-bdr);}
 
-    /* ════════════════════════════════
-       NAV
-    ════════════════════════════════ */
-    nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-      height: 64px;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 48px;
-      background: var(--nav-bg);
-      backdrop-filter: blur(18px) saturate(160%);
-      border-bottom: 1px solid var(--border);
-      transition: background .35s, border-color .35s;
-    }
-    .nav-logo {
-      font-family: 'Orbitron', monospace;
-      font-size: 1rem; font-weight: 800;
-      color: var(--accent); text-decoration: none;
-      letter-spacing: .07em;
-    }
-    .nav-logo em { color: var(--gold); font-style: normal; }
+    /* ── HERO ── */
+    #hero{min-height:100vh;display:flex;align-items:center;padding-top:64px;}
+    .hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;width:100%;}
+    .hero-pill{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);background:var(--accent-pale);border:1px solid var(--accent-bdr);padding:5px 14px;border-radius:4px;margin-bottom:24px;animation:up .7s ease both;}
+    .pill-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:blink 2s ease-in-out infinite;}
+    h1.hero-h1{font-size:clamp(2rem,4vw,3.3rem);margin-bottom:20px;animation:up .8s ease .08s both;}
+    h1.hero-h1 .ha{color:var(--accent);} h1.hero-h1 .hg{color:var(--gold);}
+    .hero-body{font-size:1.05rem;line-height:1.82;color:var(--text-2);max-width:490px;margin-bottom:30px;animation:up .9s ease .16s both;}
+    .hero-stats{display:flex;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--bg-card);margin-bottom:30px;animation:up 1s ease .24s both;box-shadow:var(--sh-card);}
+    .s-item{flex:1;padding:16px 14px;text-align:center;border-right:1px solid var(--border);}
+    .s-item:last-child{border-right:none;}
+    .s-num{font-family:'Orbitron',monospace;font-size:1.4rem;font-weight:800;color:var(--accent);display:block;line-height:1.2;}
+    .s-lbl{font-size:.68rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);margin-top:3px;display:block;}
+    .hero-btns{display:flex;gap:12px;animation:up 1s ease .32s both;}
+    .btn-pri{font-size:.875rem;font-weight:600;color:#fff;background:var(--accent);padding:11px 24px;border-radius:6px;text-decoration:none;display:inline-block;box-shadow:0 2px 10px rgba(0,0,0,.14);transition:background .18s,transform .15s;}
+    .btn-pri:hover{background:var(--accent-dim);transform:translateY(-2px);}
+    .btn-out{font-size:.875rem;font-weight:600;color:var(--accent);background:transparent;padding:10px 24px;border-radius:6px;text-decoration:none;display:inline-block;border:1.5px solid var(--accent-bdr);transition:background .18s,border-color .18s;}
+    .btn-out:hover{background:var(--accent-pale);border-color:var(--accent);}
 
-    .nav-links { display: flex; gap: 32px; }
-    .nav-links a {
-      font-size: .875rem; font-weight: 500; color: var(--text-2);
-      text-decoration: none; letter-spacing: .01em;
-      padding-bottom: 2px; position: relative;
-      transition: color .18s;
-    }
-    .nav-links a::after {
-      content: ''; position: absolute; bottom: -4px; left: 0; right: 0;
-      height: 2px; background: var(--accent); border-radius: 2px;
-      transform: scaleX(0); transition: transform .2s;
-    }
-    .nav-links a:hover { color: var(--accent); }
-    .nav-links a:hover::after { transform: scaleX(1); }
+    /* tree card */
+    .tree-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;overflow:hidden;animation:right 1s ease .2s both;box-shadow:var(--sh-card);}
+    .tc-bar{padding:11px 16px;background:var(--bg-alt);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+    .tc-dots{display:flex;gap:5px;}
+    .tc-dots span{width:9px;height:9px;border-radius:50%;background:var(--border);}
+    .tc-name{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--text-3);}
+    .tc-body{padding:16px;}
+    .t-node{display:flex;align-items:flex-start;gap:9px;padding:7px 10px;border-radius:6px;margin-bottom:3px;transition:background .15s;}
+    .t-node:hover{background:var(--accent-pale);}
+    .t-node.l1{margin-left:16px;} .t-node.l2{margin-left:32px;}
+    .n-dot{width:7px;height:7px;border-radius:50%;margin-top:8px;flex-shrink:0;}
+    .t-node.root .n-dot{background:var(--accent);box-shadow:0 0 5px var(--accent);}
+    .t-node.l1 .n-dot{background:var(--gold);}
+    .t-node.l2 .n-dot{background:var(--text-3);}
+    .n-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--text);line-height:1.45;}
+    .n-meta{font-size:.66rem;color:var(--text-3);margin-top:2px;}
+    .n-badge{display:inline-block;margin-top:4px;font-size:.63rem;font-weight:600;background:var(--accent-pale);color:var(--accent);padding:2px 7px;border-radius:3px;border:1px solid var(--accent-bdr);}
+    .tc-foot{padding:10px 16px;background:var(--bg-alt);border-top:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--accent);letter-spacing:.07em;}
 
-    .nav-right { display: flex; align-items: center; gap: 14px; }
+    /* ── SECTION HEADS ── */
+    .sh{margin-bottom:44px;}
+    .sh h2{font-size:clamp(1.4rem,2.5vw,1.95rem);margin-bottom:14px;}
+    .sh p{font-size:1rem;max-width:620px;line-height:1.78;}
 
-    /* Toggle */
-    .theme-toggle {
-      display: flex; align-items: center; gap: 7px; cursor: pointer;
-      padding: 5px 11px; border-radius: 6px;
-      border: 1px solid var(--border);
-      background: transparent; user-select: none;
-      transition: border-color .18s, background .18s;
-    }
-    .theme-toggle:hover { border-color: var(--accent); background: var(--accent-pale); }
-    .t-track {
-      width: 32px; height: 17px; border-radius: 9px;
-      border: 1.5px solid var(--accent); position: relative;
-      background: var(--accent-pale); flex-shrink: 0;
-    }
-    .t-thumb {
-      width: 11px; height: 11px; border-radius: 50%;
-      background: var(--accent);
-      position: absolute; top: 1px; left: 1px;
-      transition: transform .3s;
-    }
-    html.dark .t-thumb { transform: translateX(15px); }
-    .t-label {
-      font-size: .72rem; font-weight: 600; letter-spacing: .06em;
-      text-transform: uppercase; color: var(--text-2); min-width: 30px;
-    }
+    /* ── CARD ── */
+    .card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:26px;position:relative;transition:border-color .22s,box-shadow .22s;box-shadow:var(--sh-card);}
+    .card:hover{border-color:var(--accent-bdr);box-shadow:var(--sh-card-h);}
+    .card-bar{position:absolute;top:0;left:0;right:0;height:3px;border-radius:10px 10px 0 0;}
+    .bar-a{background:var(--accent);} .bar-r{background:var(--red);} .bar-g{background:var(--gold);}
+    .chip{display:inline-flex;align-items:center;gap:5px;font-size:.69rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:4px;margin-bottom:12px;}
+    .chip-dot{width:5px;height:5px;border-radius:50%;animation:blink 2s infinite;}
+    .chip.cr{background:var(--red-pale);color:var(--red);}  .chip.cr .chip-dot{background:var(--red);}
+    .chip.ca{background:var(--accent-pale);color:var(--accent);}  .chip.ca .chip-dot{background:var(--accent);}
+    .chip.cg{background:var(--gold-pale);color:var(--gold);}  .chip.cg .chip-dot{background:var(--gold);}
+    .chip.cv{background:var(--green-pale);color:var(--green);}  .chip.cv .chip-dot{background:var(--green);}
+    .card h3{font-size:.98rem;margin-bottom:9px;}
+    .card p{font-size:.93rem;line-height:1.72;}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
 
-    /* CTA */
-    .nav-cta {
-      font-size: .825rem; font-weight: 600;
-      color: #fff; background: var(--accent);
-      padding: 8px 20px; border-radius: 6px;
-      text-decoration: none; white-space: nowrap;
-      box-shadow: 0 2px 8px rgba(0,0,0,.15);
-      transition: background .18s, transform .15s, box-shadow .18s;
-    }
-    .nav-cta:hover { background: var(--accent-dim); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,0,0,.18); }
+    /* ── INSIGHT BOX ── */
+    .insight{background:var(--bg-card);border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:20px 24px;margin-top:26px;box-shadow:var(--sh-card);}
+    .insight.ig{border-left-color:var(--gold);}
+    .insight.ir{border-left-color:var(--red);}
+    .insight.ip{border-left-color:var(--purple);}
+    .insight-label{font-size:.73rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;display:flex;align-items:center;gap:7px;}
+    .insight.ig .insight-label{color:var(--gold);} .insight.ir .insight-label{color:var(--red);} .insight.ip .insight-label{color:var(--purple);}
+    .insight p{font-size:.94rem;line-height:1.75;}
 
-    /* ════════════════════════════════
-       LAYOUT UTILS
-    ════════════════════════════════ */
-    .wrap {
-      position: relative; z-index: 2;
-      max-width: 1080px; margin: 0 auto; padding: 0 40px;
-    }
-    section { padding: 96px 0; }
-    .divider { height: 1px; background: var(--border); position: relative; z-index: 2; }
+    /* ── PIPELINE STEPS ── */
+    .pipeline{display:flex;flex-direction:column;gap:0;margin-top:8px;}
+    .pipe-step{display:flex;gap:0;position:relative;}
+    .pipe-step:last-child .pipe-line{display:none;}
+    .pipe-left{display:flex;flex-direction:column;align-items:center;width:52px;flex-shrink:0;}
+    .pipe-dot{width:38px;height:38px;border-radius:50%;border:2px solid var(--accent);background:var(--accent-pale);display:flex;align-items:center;justify-content:center;flex-shrink:0;z-index:1;}
+    .pipe-dot-n{font-family:'Orbitron',monospace;font-size:.62rem;font-weight:800;color:var(--accent);}
+    .pipe-line{width:2px;background:var(--border);flex:1;min-height:20px;margin:4px 0;}
+    .pipe-body{flex:1;padding:0 0 36px 20px;}
+    .pipe-title{font-family:'Inter',sans-serif;font-size:1rem;font-weight:700;color:var(--text);margin-bottom:7px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .pipe-desc{font-size:.92rem;line-height:1.73;color:var(--text-2);margin-bottom:10px;}
+    .pipe-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+    .ptag{font-family:'JetBrains Mono',monospace;font-size:.68rem;padding:3px 9px;border-radius:4px;border:1px solid;font-weight:500;}
+    .ptag-a{background:var(--accent-pale);color:var(--accent);border-color:var(--accent-bdr);}
+    .ptag-g{background:var(--gold-pale);color:var(--gold);border-color:var(--gold-bdr);}
+    .ptag-r{background:var(--red-pale);color:var(--red);border-color:var(--red-bdr);}
+    .ptag-v{background:var(--green-pale);color:var(--green);border-color:var(--green-bdr);}
 
-    /* ════════════════════════════════
-       TYPE SYSTEM
-    ════════════════════════════════ */
-    .eyebrow {
-      display: inline-flex; align-items: center; gap: 8px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: .7rem; font-weight: 500;
-      letter-spacing: .2em; text-transform: uppercase;
-      color: var(--accent); margin-bottom: 14px;
-    }
-    .eyebrow::before { content: ''; width: 18px; height: 1.5px; background: var(--accent); border-radius: 1px; }
+    /* ── MODES ── */
+    .mode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:8px;}
+    .mode-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:var(--sh-card);transition:border-color .22s,box-shadow .22s;}
+    .mode-card:hover{border-color:var(--accent-bdr);box-shadow:var(--sh-card-h);}
+    .mode-header{padding:14px 18px;border-bottom:1px solid var(--border);}
+    .mode-label{font-family:'Orbitron',monospace;font-size:.75rem;font-weight:800;letter-spacing:.08em;}
+    .mode-a .mode-header{background:rgba(0,119,204,.06);} .mode-a .mode-label{color:var(--accent);}
+    .mode-b .mode-header{background:var(--gold-pale);} .mode-b .mode-label{color:var(--gold);}
+    .mode-c .mode-header{background:var(--red-pale);}  .mode-c .mode-label{color:var(--red);}
+    .mode-sub{font-size:.78rem;color:var(--text-3);margin-top:2px;}
+    .mode-body{padding:18px;}
+    .mode-step{display:flex;gap:8px;margin-bottom:10px;align-items:flex-start;}
+    .mode-step:last-child{margin-bottom:0;}
+    .mstep-n{font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:600;color:var(--accent);background:var(--accent-pale);border:1px solid var(--accent-bdr);border-radius:3px;padding:1px 6px;flex-shrink:0;margin-top:2px;}
+    .mode-b .mstep-n{color:var(--gold);background:var(--gold-pale);border-color:var(--gold-bdr);}
+    .mode-c .mstep-n{color:var(--red);background:var(--red-pale);border-color:var(--red-bdr);}
+    .mstep-text{font-size:.85rem;line-height:1.6;color:var(--text-2);}
 
-    h1, h2 {
-      font-family: 'Orbitron', monospace;
-      font-weight: 800; line-height: 1.12;
-      color: var(--text);
-    }
-    h3 { font-family: 'Inter', sans-serif; font-weight: 700; color: var(--text); }
+    /* ── CONFIG TABLE ── */
+    .cfg-table{width:100%;border-collapse:collapse;margin-top:36px;}
+    .cfg-table th{font-size:.75rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:12px 16px;text-align:left;background:var(--bg-alt);border-bottom:2px solid var(--border);color:var(--text-2);}
+    .cfg-table td{padding:12px 16px;font-size:.9rem;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.55;}
+    .cfg-table tr:last-child td{border-bottom:none;}
+    .cfg-table tr:hover td{background:var(--accent-pale);}
+    .cfg-table td:first-child{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--accent);font-weight:500;}
+    .cfg-table td:nth-child(2){color:var(--text-3);font-family:'JetBrains Mono',monospace;font-size:.8rem;}
+    .cfg-table td:last-child{color:var(--text-2);}
+    .wrap-table{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:var(--sh-card);}
 
-    p { color: var(--text-2); }
-    p strong { color: var(--text); font-weight: 600; }
+    /* ── COMPARISON TABLE ── */
+    .cmp-table{width:100%;border-collapse:collapse;}
+    .cmp-table th{font-size:.75rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:14px 18px;text-align:left;background:var(--bg-alt);border-bottom:2px solid var(--border);}
+    .cmp-table th:first-child{color:var(--text-3);}
+    .cmp-table th:nth-child(2){color:var(--red);}
+    .cmp-table th:nth-child(3){color:var(--accent);}
+    .cmp-table tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
+    .cmp-table tbody tr:last-child{border-bottom:none;}
+    .cmp-table tbody tr:hover{background:var(--accent-pale);}
+    .cmp-table td{padding:12px 18px;font-size:.9rem;line-height:1.5;vertical-align:top;}
+    .cmp-table td:first-child{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:500;color:var(--text-2);width:175px;}
+    td.cg{color:var(--green);} td.cy{color:var(--gold);} td.cr{color:var(--red);} td.cm{color:var(--text-2);}
+    .tag{display:inline-flex;font-size:.65rem;font-weight:600;padding:2px 7px;border-radius:3px;margin-top:4px;border:1px solid transparent;letter-spacing:.03em;}
+    .tg{background:var(--green-pale);color:var(--green);border-color:var(--green-bdr);}
+    .tr{background:var(--red-pale);color:var(--red);border-color:var(--red-bdr);}
+    .ty{background:var(--gold-pale);color:var(--gold);border-color:var(--gold-bdr);}
 
-    .mono {
-      font-family: 'JetBrains Mono', monospace; font-size: .82em;
-      background: var(--accent-pale); color: var(--accent);
-      padding: 2px 6px; border-radius: 4px; border: 1px solid var(--accent-bdr);
-    }
+    /* ── COST TABLE ── */
+    .cost-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:32px;}
+    .cost-item{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center;box-shadow:var(--sh-card);}
+    .cost-num{font-family:'Orbitron',monospace;font-size:1.3rem;font-weight:800;color:var(--accent);display:block;line-height:1.2;margin-bottom:4px;}
+    .cost-lbl{font-size:.72rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);}
+    .cost-desc{font-size:.78rem;color:var(--text-3);margin-top:5px;}
 
-    /* ════════════════════════════════
-       HERO
-    ════════════════════════════════ */
-    #hero {
-      min-height: 100vh; display: flex; align-items: center;
-      padding-top: 64px;
-    }
-    .hero-grid {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 64px; align-items: center; width: 100%;
-    }
+    /* ── STATES TABLE ── */
+    .states-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:28px;}
+    .state-item{background:var(--bg-card);border:1px solid var(--border);border-radius:7px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;box-shadow:var(--sh-card);}
+    .state-id{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:600;color:var(--accent);background:var(--accent-pale);border:1px solid var(--accent-bdr);border-radius:3px;padding:2px 7px;white-space:nowrap;flex-shrink:0;margin-top:1px;}
+    .state-id.si{color:var(--green);background:var(--green-pale);border-color:var(--green-bdr);}
+    .state-id.se{color:var(--red);background:var(--red-pale);border-color:var(--red-bdr);}
+    .state-id.sd{color:var(--gold);background:var(--gold-pale);border-color:var(--gold-bdr);}
+    .state-name{font-size:.85rem;font-weight:700;color:var(--text);margin-bottom:3px;}
+    .state-desc{font-size:.8rem;color:var(--text-2);line-height:1.5;}
 
-    .hero-pill {
-      display: inline-flex; align-items: center; gap: 8px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: .7rem; font-weight: 500;
-      letter-spacing: .14em; text-transform: uppercase;
-      color: var(--accent);
-      background: var(--accent-pale); border: 1px solid var(--accent-bdr);
-      padding: 5px 14px; border-radius: 4px;
-      margin-bottom: 26px; animation: up .7s ease both;
-    }
-    .pill-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: blink 2s ease-in-out infinite; }
+    /* ── DEP GRID ── */
+    .dep-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:26px;}
+    .dep-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:18px;display:flex;gap:14px;align-items:flex-start;box-shadow:var(--sh-card);transition:border-color .18s;}
+    .dep-card:hover{border-color:var(--accent-bdr);}
+    .dep-n{font-family:'Orbitron',monospace;font-size:.66rem;font-weight:700;color:var(--accent);background:var(--accent-pale);border:1px solid var(--accent-bdr);border-radius:4px;min-width:30px;height:30px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .dep-title{font-size:.85rem;font-weight:700;color:var(--text);margin-bottom:4px;}
+    .dep-body{font-size:.86rem;line-height:1.63;}
+    .warn-box{background:var(--red-pale);border:1px solid var(--red-bdr);border-left:4px solid var(--red);border-radius:0 8px 8px 0;padding:15px 20px;margin-top:20px;display:flex;gap:12px;align-items:flex-start;}
+    .w-icon{font-size:1rem;margin-top:2px;flex-shrink:0;}
+    .w-text{font-size:.88rem;line-height:1.65;color:var(--red);}
+    .w-text strong{font-weight:700;}
 
-    h1.hero-h1 {
-      font-size: clamp(2.1rem, 4.2vw, 3.5rem);
-      margin-bottom: 22px; animation: up .8s ease .08s both;
-    }
-    h1.hero-h1 .hl  { color: var(--accent); }
-    h1.hero-h1 .hl2 { color: var(--gold); }
+    /* ── DATA STRUCTURES ── */
+    .code-block{background:var(--bg-alt);border:1px solid var(--border);border-radius:8px;padding:20px 22px;margin-top:14px;overflow-x:auto;}
+    .code-block pre{font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.7;color:var(--text-2);}
+    .code-block pre .k{color:var(--accent);} /* key */
+    .code-block pre .v{color:var(--green);} /* value */
+    .code-block pre .s{color:var(--gold);}  /* string */
+    .code-block pre .c{color:var(--text-3);font-style:italic;} /* comment */
+    .ds-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:28px;}
+    .ds-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:var(--sh-card);}
+    .ds-head{padding:12px 18px;background:var(--bg-alt);border-bottom:1px solid var(--border);}
+    .ds-name{font-family:'Orbitron',monospace;font-size:.72rem;font-weight:800;color:var(--accent);letter-spacing:.07em;}
+    .ds-sub{font-size:.75rem;color:var(--text-3);margin-top:2px;}
+    .ds-body{padding:16px 18px;}
 
-    .hero-body {
-      font-size: 1.05rem; line-height: 1.82;
-      color: var(--text-2); max-width: 490px;
-      margin-bottom: 32px; animation: up .9s ease .16s both;
-    }
+    /* ── VERDICT ── */
+    .verdict{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:48px;text-align:center;position:relative;overflow:hidden;margin-top:24px;box-shadow:var(--sh-card);}
+    .verdict::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--gold),var(--red));}
+    .v-quote{font-family:'Orbitron',monospace;font-size:clamp(.95rem,1.8vw,1.2rem);font-weight:700;line-height:1.65;color:var(--text);margin-bottom:16px;}
+    .v-quote .ha{color:var(--accent);} .v-quote .hg{color:var(--gold);} .v-quote .hr{color:var(--red);}
+    .v-sub{font-size:1rem;line-height:1.78;color:var(--text-2);max-width:520px;margin:0 auto 32px;}
 
-    .hero-stats {
-      display: flex; gap: 0;
-      border: 1px solid var(--border); border-radius: 8px;
-      overflow: hidden; background: var(--bg-card);
-      margin-bottom: 32px; animation: up 1s ease .24s both;
-    }
-    html.light .hero-stats { box-shadow: 0 2px 12px rgba(0,0,0,.06); }
-    html.dark  .hero-stats { box-shadow: 0 2px 12px rgba(0,0,0,.25); }
-    .s-item { flex: 1; padding: 18px 16px; text-align: center; border-right: 1px solid var(--border); }
-    .s-item:last-child { border-right: none; }
-    .s-num {
-      font-family: 'Orbitron', monospace; font-size: 1.45rem; font-weight: 800;
-      color: var(--accent); display: block; line-height: 1.2;
-    }
-    .s-lbl {
-      font-size: .7rem; font-weight: 600; letter-spacing: .07em;
-      text-transform: uppercase; color: var(--text-3); margin-top: 3px; display: block;
-    }
+    /* ── FOOTER ── */
+    footer{border-top:1px solid var(--border);padding:32px 0;background:var(--bg-alt);position:relative;z-index:2;}
+    .footer-in{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+    .f-brand{font-family:'Orbitron',monospace;font-size:.88rem;font-weight:800;color:var(--accent);}
+    .f-brand em{color:var(--gold);font-style:normal;}
+    .f-links{display:flex;gap:22px;}
+    .f-links a{font-size:.85rem;font-weight:500;color:var(--text-2);text-decoration:none;transition:color .18s;}
+    .f-links a:hover{color:var(--accent);}
+    .f-copy{font-size:.78rem;color:var(--text-3);}
 
-    .hero-btns { display: flex; gap: 12px; animation: up 1s ease .32s both; }
-    .btn-pri {
-      font-size: .875rem; font-weight: 600; color: #fff;
-      background: var(--accent); padding: 12px 26px; border-radius: 6px;
-      text-decoration: none; display: inline-block;
-      transition: background .18s, transform .15s, box-shadow .18s;
-      box-shadow: 0 2px 10px rgba(0,0,0,.15);
-    }
-    .btn-pri:hover { background: var(--accent-dim); transform: translateY(-2px); }
-    .btn-out {
-      font-size: .875rem; font-weight: 600; color: var(--accent);
-      background: transparent; padding: 11px 26px; border-radius: 6px;
-      text-decoration: none; display: inline-block;
-      border: 1.5px solid var(--accent-bdr);
-      transition: background .18s, border-color .18s;
-    }
-    .btn-out:hover { background: var(--accent-pale); border-color: var(--accent); }
+    /* ── REVEAL ── */
+    .reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease;}
+    .reveal.vis{opacity:1;transform:none;}
 
-    /* Tree card */
-    .tree-card {
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: 10px; overflow: hidden;
-      animation: right 1s ease .2s both;
-    }
-    html.light .tree-card { box-shadow: 0 4px 28px rgba(0,0,0,.07); }
-    html.dark  .tree-card { box-shadow: 0 4px 28px rgba(0,0,0,.35); }
-    .tc-bar {
-      padding: 12px 18px; background: var(--bg-alt);
-      border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; gap: 10px;
-    }
-    .tc-dots { display: flex; gap: 5px; }
-    .tc-dots span { width: 9px; height: 9px; border-radius: 50%; background: var(--border); }
-    .tc-name {
-      font-family: 'JetBrains Mono', monospace; font-size: .7rem; color: var(--text-3);
-    }
-    .tc-body { padding: 18px; }
-    .t-node { display: flex; align-items: flex-start; gap: 9px; padding: 8px 10px; border-radius: 6px; margin-bottom: 3px; transition: background .18s; }
-    .t-node:hover { background: var(--accent-pale); }
-    .t-node.l1 { margin-left: 18px; }
-    .t-node.l2 { margin-left: 36px; }
-    .n-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 8px; flex-shrink: 0; }
-    .t-node.root .n-dot { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
-    .t-node.l1   .n-dot { background: var(--gold); }
-    .t-node.l2   .n-dot { background: var(--text-3); }
-    .n-label {
-      font-family: 'JetBrains Mono', monospace; font-size: .73rem;
-      color: var(--text); line-height: 1.45;
-    }
-    .n-meta { font-size: .67rem; color: var(--text-3); margin-top: 2px; }
-    .n-badge {
-      display: inline-block; margin-top: 4px; font-size: .64rem; font-weight: 600;
-      background: var(--accent-pale); color: var(--accent);
-      padding: 2px 7px; border-radius: 3px; border: 1px solid var(--accent-bdr);
-    }
-    .tc-foot {
-      padding: 11px 18px; background: var(--bg-alt); border-top: 1px solid var(--border);
-      font-family: 'JetBrains Mono', monospace; font-size: .67rem;
-      color: var(--accent); letter-spacing: .07em;
-    }
+    @keyframes up{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:none;}}
+    @keyframes right{from{opacity:0;transform:translateX(26px);}to{opacity:1;transform:none;}}
+    @keyframes blink{0%,100%{opacity:1;}50%{opacity:.35;}}
 
-    /* ════════════════════════════════
-       SECTION HEADS
-    ════════════════════════════════ */
-    .sh { margin-bottom: 48px; }
-    .sh h2 { font-size: clamp(1.45rem, 2.6vw, 2rem); margin-bottom: 14px; }
-    .sh p  { font-size: 1.025rem; max-width: 600px; line-height: 1.78; }
-
-    /* ════════════════════════════════
-       CARDS (generic)
-    ════════════════════════════════ */
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
-
-    .card {
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: 10px; padding: 28px; position: relative;
-      transition: border-color .22s, box-shadow .22s;
-    }
-    html.light .card { box-shadow: 0 2px 14px rgba(0,0,0,.05); }
-    html.dark  .card { box-shadow: 0 2px 14px rgba(0,0,0,.22); }
-    .card:hover { border-color: var(--accent-bdr); }
-    html.light .card:hover { box-shadow: 0 6px 24px rgba(0,119,204,.10); }
-    html.dark  .card:hover { box-shadow: 0 6px 24px rgba(56,189,248,.10); }
-
-    .card-bar { position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: 10px 10px 0 0; }
-    .bar-r { background: var(--red); }
-    .bar-a { background: var(--accent); }
-    .bar-g { background: var(--gold); }
-
-    .chip {
-      display: inline-flex; align-items: center; gap: 5px;
-      font-size: .7rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
-      padding: 3px 9px; border-radius: 4px; margin-bottom: 14px;
-    }
-    .chip-dot { width: 5px; height: 5px; border-radius: 50%; animation: blink 2s infinite; }
-    .chip.cr { background: var(--red-pale);   color: var(--red);   }
-    .chip.cr .chip-dot { background: var(--red); }
-    .chip.ca { background: var(--accent-pale); color: var(--accent); }
-    .chip.ca .chip-dot { background: var(--accent); }
-
-    .card h3 { font-size: 1rem; margin-bottom: 10px; }
-    .card p  { font-size: .95rem; line-height: 1.73; }
-
-    .flow {
-      display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 18px;
-    }
-    .f-pill {
-      font-family: 'JetBrains Mono', monospace; font-size: .69rem;
-      padding: 4px 9px; border-radius: 4px;
-      border: 1px solid var(--border); color: var(--text-2); background: var(--bg-alt);
-    }
-    .f-arr { color: var(--text-3); font-size: .7rem; }
-
-    /* ════════════════════════════════
-       INSIGHT CALLOUT
-    ════════════════════════════════ */
-    .insight {
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-left: 4px solid var(--accent);
-      border-radius: 0 8px 8px 0; padding: 22px 26px; margin-top: 28px;
-    }
-    html.light .insight { box-shadow: 0 2px 10px rgba(0,0,0,.04); }
-    .insight.ig { border-left-color: var(--gold); }
-    .insight.ir { border-left-color: var(--red); }
-    .insight-label {
-      font-size: .75rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
-      color: var(--accent); margin-bottom: 8px; display: flex; align-items: center; gap: 7px;
-    }
-    .insight.ig .insight-label { color: var(--gold); }
-    .insight.ir .insight-label { color: var(--red); }
-    .insight p { font-size: .95rem; line-height: 1.76; }
-
-    /* ════════════════════════════════
-       TABLE
-    ════════════════════════════════ */
-    .tbl-wrap {
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: 10px; overflow: hidden; margin-top: 36px;
-    }
-    html.light .tbl-wrap { box-shadow: 0 2px 16px rgba(0,0,0,.05); }
-    html.dark  .tbl-wrap { box-shadow: 0 2px 16px rgba(0,0,0,.24); }
-    table { width: 100%; border-collapse: collapse; }
-    thead th {
-      font-size: .78rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
-      padding: 15px 20px; text-align: left;
-      background: var(--bg-alt); border-bottom: 2px solid var(--border);
-    }
-    thead th:first-child { color: var(--text-3); }
-    thead th:nth-child(2){ color: var(--red); }
-    thead th:nth-child(3){ color: var(--accent); }
-    tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
-    tbody tr:last-child { border-bottom: none; }
-    tbody tr:hover { background: var(--accent-pale); }
-    td {
-      padding: 13px 20px; font-size: .92rem;
-      line-height: 1.55; vertical-align: top;
-    }
-    td:first-child {
-      font-family: 'JetBrains Mono', monospace; font-size: .76rem;
-      font-weight: 500; color: var(--text-2); width: 185px;
-    }
-    td.cg { color: var(--green); } td.cy { color: var(--gold); }
-    td.cr { color: var(--red); }  td.cm { color: var(--text-2); }
-    .tag {
-      display: inline-flex; font-size: .66rem; font-weight: 600;
-      padding: 2px 8px; border-radius: 3px; margin-top: 5px;
-      border: 1px solid transparent; letter-spacing: .03em;
-    }
-    .tg { background: var(--green-pale); color: var(--green); border-color: rgba(0,110,69,.22); }
-    .tr { background: var(--red-pale);   color: var(--red);   border-color: rgba(196,31,59,.22); }
-    .ty { background: var(--gold-pale);  color: var(--gold);  border-color: rgba(160,88,0,.22); }
-
-    /* ════════════════════════════════
-       DEP GRID
-    ════════════════════════════════ */
-    .dep-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 28px; }
-    .dep-card {
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: 8px; padding: 18px 20px;
-      display: flex; gap: 14px; align-items: flex-start;
-      transition: border-color .18s;
-    }
-    html.light .dep-card { box-shadow: 0 1px 8px rgba(0,0,0,.04); }
-    .dep-card:hover { border-color: var(--accent-bdr); }
-    .dep-n {
-      font-family: 'Orbitron', monospace; font-size: .66rem; font-weight: 700;
-      color: var(--accent); background: var(--accent-pale); border: 1px solid var(--accent-bdr);
-      border-radius: 4px; min-width: 30px; height: 30px;
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    }
-    .dep-title { font-size: .875rem; font-weight: 700; color: var(--text); margin-bottom: 5px; }
-    .dep-body { font-size: .88rem; line-height: 1.65; }
-
-    .warn-box {
-      background: var(--red-pale); border: 1px solid rgba(196,31,59,.28);
-      border-left: 4px solid var(--red); border-radius: 0 8px 8px 0;
-      padding: 16px 20px; margin-top: 22px;
-      display: flex; gap: 12px; align-items: flex-start;
-    }
-    .w-icon { font-size: 1rem; margin-top: 2px; flex-shrink: 0; }
-    .w-text { font-size: .9rem; line-height: 1.68; color: var(--red); }
-    .w-text strong { font-weight: 700; }
-
-    /* ════════════════════════════════
-       VERDICT
-    ════════════════════════════════ */
-    .verdict {
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: 12px; padding: 52px; text-align: center;
-      position: relative; overflow: hidden; margin-top: 24px;
-    }
-    html.light .verdict { box-shadow: 0 4px 28px rgba(0,0,0,.07); }
-    html.dark  .verdict { box-shadow: 0 4px 28px rgba(0,0,0,.32); }
-    .verdict::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-      background: linear-gradient(90deg, var(--accent), var(--gold), var(--red));
-    }
-    .v-quote {
-      font-family: 'Orbitron', monospace;
-      font-size: clamp(1rem, 2vw, 1.25rem); font-weight: 700;
-      line-height: 1.65; color: var(--text); margin-bottom: 18px;
-    }
-    .v-quote .ha { color: var(--accent); }
-    .v-quote .hg { color: var(--gold); }
-    .v-quote .hr { color: var(--red); }
-    .v-sub {
-      font-size: 1rem; line-height: 1.78; color: var(--text-2);
-      max-width: 540px; margin: 0 auto 36px;
-    }
-
-    /* ════════════════════════════════
-       FOOTER
-    ════════════════════════════════ */
-    footer {
-      border-top: 1px solid var(--border); padding: 34px 0;
-      background: var(--bg-alt); position: relative; z-index: 2;
-    }
-    .footer-in {
-      display: flex; align-items: center;
-      justify-content: space-between; flex-wrap: wrap; gap: 16px;
-    }
-    .f-brand {
-      font-family: 'Orbitron', monospace; font-size: .9rem; font-weight: 800; color: var(--accent);
-    }
-    .f-brand em { color: var(--gold); font-style: normal; }
-    .f-links { display: flex; gap: 24px; }
-    .f-links a {
-      font-size: .875rem; font-weight: 500; color: var(--text-2);
-      text-decoration: none; transition: color .18s;
-    }
-    .f-links a:hover { color: var(--accent); }
-    .f-copy { font-size: .8rem; color: var(--text-3); }
-
-    /* ════════════════════════════════
-       REVEAL
-    ════════════════════════════════ */
-    .reveal { opacity: 0; transform: translateY(26px); transition: opacity .6s ease, transform .6s ease; }
-    .reveal.vis { opacity: 1; transform: none; }
-
-    @keyframes up    { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:none; } }
-    @keyframes right { from { opacity:0; transform:translateX(28px); } to { opacity:1; transform:none; } }
-    @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.35;} }
-
-    /* ════════════════════════════════
-       RESPONSIVE
-    ════════════════════════════════ */
-    @media(max-width:900px) {
-      nav { padding: 0 20px; }
-      .nav-links { display: none; }
-      .wrap { padding: 0 20px; }
-      .hero-grid, .grid-2, .grid-3, .dep-grid { grid-template-columns: 1fr; }
-      section { padding: 64px 0; }
-      .verdict { padding: 32px 20px; }
+    @media(max-width:960px){
+      .hero-grid,.grid-2,.grid-3,.mode-grid,.dep-grid,.ds-grid,.cost-grid,.states-grid{grid-template-columns:1fr;}
+      nav{padding:0 20px;} .nav-links{display:none;}
+      .wrap{padding:0 20px;} section{padding:60px 0;}
+      .verdict{padding:28px 20px;} .pipe-body{padding-bottom:24px;}
     }
   </style>
 </head>
 <body>
-
 <canvas id="bg-canvas"></canvas>
 
-<!-- NAV -->
+<!-- ══ NAV ══ -->
 <nav>
   <a href="#" class="nav-logo">Page<em>Index</em>J</a>
   <div class="nav-links">
-    <a href="#concept">Concept</a>
-    <a href="#how">How It Works</a>
+    <a href="#overview">Overview</a>
+    <a href="#pipeline">Pipeline</a>
+    <a href="#modes">Modes</a>
     <a href="#compare">Compare</a>
-    <a href="#tradeoffs">Tradeoffs</a>
+    <a href="#config">Config</a>
+    <a href="#devs">For Devs</a>
   </div>
   <div class="nav-right">
     <div class="theme-toggle" id="themeTgl">
@@ -548,213 +297,248 @@
   </div>
 </nav>
 
-<!-- ════ HERO ════ -->
+<!-- ══ HERO ══ -->
 <section id="hero">
   <div class="wrap">
     <div class="hero-grid">
-
       <div>
-        <div class="hero-pill"><span class="pill-dot"></span> Reasoning-Based RAG · No Vector DB</div>
-        <h1 class="hero-h1">Retrieval That<br><span class="hl">Reasons,</span><br>Not <span class="hl2">Guesses</span></h1>
-        <p class="hero-body">
-          PageIndexJ replaces vector databases with a hierarchical tree index and LLM reasoning.
-          No chunking. No cosine distance. No "close enough." The right section, every time.
-        </p>
+        <div class="hero-pill"><span class="pill-dot"></span>Reasoning-Based RAG · v1.0.0 · Java + GPT-4o</div>
+        <h1 class="hero-h1">Retrieval That<br><span class="ha">Reasons,</span><br>Not <span class="hg">Guesses</span></h1>
+        <p class="hero-body">PageIndexJ takes a PDF or Markdown file and builds a hierarchical JSON tree — an intelligent, LLM-generated Table of Contents where every node knows its exact page range and has a plain-English summary. Retrieval uses reasoning over structure, not cosine distance.</p>
         <div class="hero-stats">
           <div class="s-item"><span class="s-num" id="stat-acc">98.7%</span><span class="s-lbl">FinanceBench</span></div>
+          <div class="s-item"><span class="s-num">9</span><span class="s-lbl">Pipeline Steps</span></div>
           <div class="s-item"><span class="s-num">0</span><span class="s-lbl">Vector DBs</span></div>
-          <div class="s-item"><span class="s-num">∞</span><span class="s-lbl">Doc Depth</span></div>
+          <div class="s-item"><span class="s-num">~133</span><span class="s-lbl">API calls / 100pg</span></div>
         </div>
         <div class="hero-btns">
           <a href="https://github.com/jayant93/PageIndexJ" target="_blank" class="btn-pri">View on GitHub ↗</a>
-          <a href="#concept" class="btn-out">Learn More</a>
+          <a href="#pipeline" class="btn-out">See the Pipeline</a>
         </div>
       </div>
-
       <div>
         <div class="tree-card">
-          <div class="tc-bar">
-            <div class="tc-dots"><span></span><span></span><span></span></div>
-            <span class="tc-name">financial_report_2024.pdf — live tree index</span>
-          </div>
+          <div class="tc-bar"><div class="tc-dots"><span></span><span></span><span></span></div><span class="tc-name">annual-report.pdf → results/annual-report_structure.json</span></div>
           <div class="tc-body">
-            <div class="t-node root">
-              <div class="n-dot"></div>
-              <div><div class="n-label">ANNUAL REPORT 2024</div><div class="n-meta">pages 1–210 · root node</div></div>
-            </div>
-            <div class="t-node l1">
-              <div class="n-dot"></div>
-              <div><div class="n-label">01 · Financial Statements</div><div class="n-meta">pages 12–87 · 4 children</div></div>
-            </div>
-            <div class="t-node l2">
-              <div class="n-dot"></div>
-              <div>
-                <div class="n-label">→ EBITDA Reconciliation</div>
-                <div class="n-meta">pages 34–41</div>
-                <span class="n-badge">★ matched by reasoning</span>
-              </div>
-            </div>
-            <div class="t-node l1">
-              <div class="n-dot"></div>
-              <div><div class="n-label">02 · Risk Factors</div><div class="n-meta">pages 88–120 · 6 children</div></div>
-            </div>
-            <div class="t-node l2">
-              <div class="n-dot"></div>
-              <div><div class="n-label">→ Liquidity &amp; Covenant Breaches</div><div class="n-meta">pages 104–112</div></div>
-            </div>
+            <div class="t-node root"><div class="n-dot"></div><div><div class="n-label">ANNUAL REPORT 2024</div><div class="n-meta">node_id: 0001 · pages 1–210 · depth 0</div></div></div>
+            <div class="t-node l1"><div class="n-dot"></div><div><div class="n-label">01 · Financial Statements</div><div class="n-meta">node_id: 0002 · pages 12–87 · 4 children</div></div></div>
+            <div class="t-node l2"><div class="n-dot"></div><div><div class="n-label">→ EBITDA Reconciliation</div><div class="n-meta">node_id: 0007 · pages 34–41</div><span class="n-badge">★ matched by LLM reasoning</span></div></div>
+            <div class="t-node l1"><div class="n-dot"></div><div><div class="n-label">02 · Risk Factors</div><div class="n-meta">node_id: 0012 · pages 88–120 · 6 children</div></div></div>
+            <div class="t-node l2"><div class="n-dot"></div><div><div class="n-label">→ Liquidity &amp; Covenant Breaches</div><div class="n-meta">node_id: 0015 · pages 104–112</div></div></div>
           </div>
-          <div class="tc-foot">✓ reasoning path traced · no vector lookup · fully auditable</div>
+          <div class="tc-foot">✓ reasoning path traced · no vector lookup · breadth-first node IDs · fully auditable</div>
         </div>
       </div>
-
     </div>
   </div>
 </section>
 
 <div class="divider"></div>
 
-<!-- ════ CONCEPT ════ -->
-<section id="concept">
+<!-- ══ OVERVIEW ══ -->
+<section id="overview">
   <div class="wrap">
     <div class="sh reveal">
-      <div class="eyebrow">01 · The Problem</div>
-      <h2>What Vector RAG Solves —<br>And Where It Breaks</h2>
-      <p>Vector RAG was built to solve the context window problem. But the fix introduced a subtler, harder-to-debug failure: semantic similarity is not the same as relevance.</p>
+      <div class="eyebrow">01 · System Overview</div>
+      <h2>What PageIndexJ Does</h2>
+      <p>A single Java-based engine that reads a document, calls the OpenAI API across up to 9 structured steps, and writes a hierarchical JSON tree to disk. No database. No vector store. No network dependency beyond OpenAI.</p>
     </div>
-    <div class="grid-2 reveal">
-      <div class="card">
-        <div class="card-bar bar-r"></div>
-        <div class="chip cr"><span class="chip-dot"></span>The Real Problem</div>
-        <h3>Context Window Overflow</h3>
-        <p>A 500-page financial report contains ~250,000 tokens. LLMs can't consume that in one shot. The standard fix: chunk it, embed it, retrieve the top-k most similar chunks at query time.</p>
-        <div class="flow">
-          <span class="f-pill">500-page PDF</span><span class="f-arr">→</span>
-          <span class="f-pill">Chunk</span><span class="f-arr">→</span>
-          <span class="f-pill">Embed</span><span class="f-arr">→</span>
-          <span class="f-pill">Top-k retrieve</span>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-bar bar-r"></div>
-        <div class="chip cr"><span class="chip-dot"></span>The Hidden Cost</div>
-        <h3>Similarity ≠ Relevance</h3>
-        <p>Ask "What is the EBITDA calculation?" — every section mentioning earnings scores high cosine similarity. But only one defines the specific calculation relevant to the question. Vector search cannot reason about that distinction.</p>
-        <div class="flow">
-          <span class="f-pill">"EBITDA calc?"</span><span class="f-arr">→</span>
-          <span class="f-pill">12 similar chunks</span><span class="f-arr">→</span>
-          <span class="f-pill">Wrong answer</span>
-        </div>
-      </div>
-    </div>
-    <div class="insight reveal">
-      <div class="insight-label">⬡ Core Insight</div>
-      <p>Chunking destroys a document's <strong>hierarchy</strong>. A footnote referencing Appendix B, a table nested under Section 4.1, a definition that overrides an earlier one — all this context becomes invisible to cosine distance. Document structure carries meaning that embeddings cannot encode.</p>
-    </div>
-  </div>
-</section>
 
-<div class="divider"></div>
-
-<!-- ════ HOW IT WORKS ════ -->
-<section id="how">
-  <div class="wrap">
-    <div class="sh reveal">
-      <div class="eyebrow">02 · The Approach</div>
-      <h2>How PageIndex Works</h2>
-      <p>Instead of embedding chunks into a vector space, PageIndex builds a hierarchical tree of the document's natural structure — then lets an LLM reason its way to the correct answer.</p>
-    </div>
     <div class="grid-3 reveal">
-      <div class="card">
-        <div class="card-bar bar-a"></div>
-        <div style="font-size:1.5rem;margin-bottom:14px;">🌳</div>
-        <h3 style="margin-bottom:10px;">01 · Tree Index Generation</h3>
-        <p style="font-size:.93rem;">The document is parsed into a hierarchical JSON tree — sections, subsections, page ranges, and LLM-generated summaries per node. Document structure is preserved, not flattened into arbitrary chunks.</p>
-      </div>
-      <div class="card">
-        <div class="card-bar bar-a"></div>
-        <div style="font-size:1.5rem;margin-bottom:14px;">🧠</div>
-        <h3 style="margin-bottom:10px;">02 · In-Context Reasoning</h3>
-        <p style="font-size:.93rem;">The tree index lives in the LLM's active context window. At retrieval time, the model reads node titles and summaries to navigate toward the right section — exactly like a human expert using a table of contents.</p>
-      </div>
-      <div class="card">
-        <div class="card-bar bar-a"></div>
-        <div style="font-size:1.5rem;margin-bottom:14px;">🎯</div>
-        <h3 style="margin-bottom:10px;">03 · Precise Extraction</h3>
-        <p style="font-size:.93rem;">Once the target node is identified, only that bounded section is fetched — controlled by <span class="mono">max_page_num_each_node</span> and <span class="mono">max_token_num_each_node</span>. Context stays manageable and fully traceable.</p>
-      </div>
+      <div class="card"><div class="card-bar bar-a"></div><div class="chip ca"><span class="chip-dot"></span>Input</div><h3>PDF or Markdown</h3><p>Provide a file path to a <span class="mono">.pdf</span> or <span class="mono">.md</span> file plus optional config overrides. That's it — no pre-processing, no chunking, no embedding model needed.</p></div>
+      <div class="card"><div class="card-bar bar-a"></div><div class="chip ca"><span class="chip-dot"></span>Processing</div><h3>9-Step LLM Pipeline</h3><p>The engine parses pages, detects structure, verifies section locations with concurrent GPT-4o calls, builds a nested tree, and optionally generates per-node summaries.</p></div>
+      <div class="card"><div class="card-bar bar-a"></div><div class="chip ca"><span class="chip-dot"></span>Output</div><h3>JSON Tree + Audit Log</h3><p>A structured <span class="mono">results/&lt;name&gt;_structure.json</span> file containing the full hierarchy, and a timestamped <span class="mono">logs/&lt;name&gt;_&lt;ts&gt;.json</span> recording every decision.</p></div>
     </div>
-    <div class="insight ig reveal">
-      <div class="insight-label">⬡ Important — Cost Is Front-Loaded, Not Eliminated</div>
-      <p>PageIndex doesn't escape the context window problem — it <strong>relocates</strong> it to build time. Index building makes many LLM calls: TOC detection per page, parallel async section verification, summary generation per node, and fix/retry calls via <span class="mono">verify_toc</span> + <span class="mono">fix_incorrect_toc_with_retries</span> (<span class="mono">page_index.py:870</span>). Retrieval is fast — but the build-time cost is significant.</p>
+
+    <div class="insight reveal">
+      <div class="insight-label">⬡ System Boundary</div>
+      <p>External dependencies are exactly two: the <strong>OpenAI Chat Completions API</strong> (model: <span class="mono">gpt-4o-2024-11-20</span>, temperature: 0) and the <strong>local filesystem</strong>. No vector database, no embedding pipeline, no external services beyond OpenAI. All intelligence comes from GPT-4o; all state lives in the JSON output file.</p>
     </div>
   </div>
 </section>
 
 <div class="divider"></div>
 
-<!-- ════ COMPARE ════ -->
+<!-- ══ PIPELINE ══ -->
+<section id="pipeline">
+  <div class="wrap">
+    <div class="sh reveal">
+      <div class="eyebrow">02 · The Pipeline</div>
+      <h2>9 Steps, Start to Finish</h2>
+      <p>Every run follows the same deterministic sequence. Steps that involve OpenAI are clearly marked. Steps that run concurrent API calls are marked parallel.</p>
+    </div>
+
+    <div class="pipeline reveal">
+
+      <div class="pipe-step">
+        <div class="pipe-left"><div class="pipe-dot"><span class="pipe-dot-n">00</span></div><div class="pipe-line"></div></div>
+        <div class="pipe-body">
+          <div class="pipe-title">Startup &amp; Validation <span class="ptag ptag-v">No API calls</span></div>
+          <p class="pipe-desc">Read config (merge <span class="mono">config.yaml</span> defaults with user overrides), validate the input file exists with the correct extension, load the API key from <span class="mono">.env</span>, and open the JSON audit log file for this run.</p>
+          <div class="pipe-tags"><span class="ptag ptag-r">Fails if: file not found</span><span class="ptag ptag-r">Fails if: API key missing</span><span class="ptag ptag-r">Fails if: wrong extension</span><span class="ptag ptag-a">UI state: VALIDATING</span></div>
+        </div>
+      </div>
+
+      <div class="pipe-step">
+        <div class="pipe-left"><div class="pipe-dot"><span class="pipe-dot-n">01</span></div><div class="pipe-line"></div></div>
+        <div class="pipe-body">
+          <div class="pipe-title">Parse Document into Pages <span class="ptag ptag-v">No API calls</span></div>
+          <p class="pipe-desc">PDF: Apache PDFBox extracts text from every page and counts tokens using tiktoken. Output: <span class="mono">List&lt;PageEntry(text, tokenCount)&gt;</span>. Markdown: split on heading lines (<span class="mono">#</span>, <span class="mono">##</span>, <span class="mono">###</span>…) — each heading becomes a node with its text as content.</p>
+          <div class="pipe-tags"><span class="ptag ptag-a">UI state: PARSING</span><span class="ptag ptag-a">Progress: pages X / N</span><span class="ptag ptag-g">Typical output: 87 pages, 142,350 tokens</span></div>
+        </div>
+      </div>
+
+      <div class="pipe-step">
+        <div class="pipe-left"><div class="pipe-dot"><span class="pipe-dot-n">02</span></div><div class="pipe-line"></div></div>
+        <div class="pipe-body">
+          <div class="pipe-title">TOC Detection <span class="ptag ptag-r">PDF only</span> <span class="ptag ptag-a">Up to 20 API calls</span></div>
+          <p class="pipe-desc">Scans pages 0 through <span class="mono">toc_check_page_num</span> (default: 20). For each page, asks GPT-4o: <em>"Does this page contain a Table of Contents?"</em> Stops scanning once a run of "yes" pages ends. If no TOC is found, skips directly to Step 4 Mode C.</p>
+          <div class="pipe-tags"><span class="ptag ptag-a">UI state: TOC_SCANNING</span><span class="ptag ptag-a">Progress: page X / 20</span><span class="ptag ptag-g">Can cancel</span></div>
+        </div>
+      </div>
+
+      <div class="pipe-step">
+        <div class="pipe-left"><div class="pipe-dot"><span class="pipe-dot-n">03</span></div><div class="pipe-line"></div></div>
+        <div class="pipe-body">
+          <div class="pipe-title">TOC Content Analysis <span class="ptag ptag-a">1 API call</span></div>
+          <p class="pipe-desc">Concatenates all TOC page text (cleans long dot sequences), then asks GPT-4o: <em>"Does this TOC include page numbers?"</em> The answer determines which extraction mode runs next: <strong>Mode A</strong> (TOC + page numbers), <strong>Mode B</strong> (TOC, no page numbers), or <strong>Mode C</strong> (no TOC).</p>
+          <div class="pipe-tags"><span class="ptag ptag-a">UI state: TOC_ANALYZING</span></div>
+        </div>
+      </div>
+
+      <div class="pipe-step">
+        <div class="pipe-left"><div class="pipe-dot"><span class="pipe-dot-n">04</span></div><div class="pipe-line"></div></div>
+        <div class="pipe-body">
+          <div class="pipe-title">Structure Extraction — Modes A / B / C <span class="ptag ptag-a">5–15 API calls</span> <span class="ptag ptag-g">Can cancel</span></div>
+          <p class="pipe-desc">The core extraction step. Three paths depending on what Step 3 found. Mode A (TOC with page numbers): transforms TOC to JSON, computes physical page offset, fixes null entries. Mode B (TOC, no page numbers): walks the entire document in token-bounded chunks to locate each section. Mode C (no TOC): generates structure from scratch by reading chunks sequentially. See Extraction Modes section below for full detail.</p>
+          <div class="pipe-tags"><span class="ptag ptag-a">UI state: EXTRACTING</span><span class="ptag ptag-a">Progress: chunks X / N</span></div>
+        </div>
+      </div>
+
+      <div class="pipe-step">
+        <div class="pipe-left"><div class="pipe-dot"><span class="pipe-dot-n">05</span></div><div class="pipe-line"></div></div>
+        <div class="pipe-body">
+          <div class="pipe-title">Verification <span class="ptag ptag-r">1 call per section (all concurrent)</span></div>
+          <p class="pipe-desc">For every extracted section, asks GPT-4o: <em>"Does section '[title]' appear on this page?"</em> All checks fire simultaneously. Computes an accuracy score. If accuracy &gt; 60%: auto-fix incorrect items (Step 5a). If ≤ 60%: fall back to a simpler extraction mode. If 100%: proceed directly to Step 6.</p>
+          <div class="pipe-tags"><span class="ptag ptag-a">UI state: VERIFYING</span><span class="ptag ptag-a">Progress: X / N · accuracy Y%</span><span class="ptag ptag-r">50 concurrent calls for a 50-section doc</span></div>
+        </div>
+      </div>
+
+      <div class="pipe-step">
+        <div class="pipe-left"><div class="pipe-dot"><span class="pipe-dot-n">5a</span></div><div class="pipe-line"></div></div>
+        <div class="pipe-body">
+          <div class="pipe-title">Auto-Correction <span class="ptag ptag-a">Up to 3× retry</span> <span class="ptag ptag-r">Concurrent calls</span></div>
+          <p class="pipe-desc">For each incorrect section: find the nearest correct sections above and below, retrieve all pages in that range, ask GPT-4o to pinpoint the exact start page. Runs concurrently for all incorrect items. Re-verifies after each round. Repeats up to 3 times.</p>
+          <div class="pipe-tags"><span class="ptag ptag-a">UI state: FIXING</span><span class="ptag ptag-a">Progress: X corrected / N · attempt Y / 3</span></div>
+        </div>
+      </div>
+
+      <div class="pipe-step">
+        <div class="pipe-left"><div class="pipe-dot"><span class="pipe-dot-n">06</span></div><div class="pipe-line"></div></div>
+        <div class="pipe-body">
+          <div class="pipe-title">Tree Building <span class="ptag ptag-v">No API calls</span></div>
+          <p class="pipe-desc">Pure logic. Adds a "Preface" node at page 1 if needed. Assigns <span class="mono">start_index</span> and <span class="mono">end_index</span> to every node. Converts the flat list into a nested tree using structure codes: <span class="mono">"1"</span> → root, <span class="mono">"1.1"</span> → child, <span class="mono">"1.1.2"</span> → grandchild. Concurrent checks determine whether section titles appear at the top of their page or partway through.</p>
+          <div class="pipe-tags"><span class="ptag ptag-v">No API calls</span><span class="ptag ptag-a">UI state: TREE_BUILDING</span></div>
+        </div>
+      </div>
+
+      <div class="pipe-step">
+        <div class="pipe-left"><div class="pipe-dot"><span class="pipe-dot-n">07</span></div><div class="pipe-line"></div></div>
+        <div class="pipe-body">
+          <div class="pipe-title">Recursive Sub-Indexing <span class="ptag ptag-a">5–15 calls per large node</span> <span class="ptag ptag-r">Concurrent</span></div>
+          <p class="pipe-desc">Any node spanning more than <span class="mono">max_page_num_each_node</span> pages (default: 10) AND more than <span class="mono">max_token_num_each_node</span> tokens (default: 20,000) gets re-indexed recursively. Steps 4–6 re-run on just that node's pages. Multiple large nodes are processed concurrently. Sub-nodes can themselves trigger further recursion.</p>
+          <div class="pipe-tags"><span class="ptag ptag-a">UI state: SUB_INDEXING</span><span class="ptag ptag-g">e.g. "Chapter 3 — Methodology (pages 45–92)"</span></div>
+        </div>
+      </div>
+
+      <div class="pipe-step">
+        <div class="pipe-left"><div class="pipe-dot"><span class="pipe-dot-n">08</span></div><div class="pipe-line"></div></div>
+        <div class="pipe-body">
+          <div class="pipe-title">Enrichment — IDs, Summaries, Description <span class="ptag ptag-a">1 call per node (concurrent)</span></div>
+          <p class="pipe-desc">Four optional sub-steps controlled by config flags. <strong>8a</strong>: assign breadth-first sequential node IDs (<span class="mono">"0001"</span>, <span class="mono">"0002"</span>…). <strong>8b</strong>: append raw page text to each node. <strong>8c</strong>: generate a 2–3 sentence LLM summary per node (all concurrent). <strong>8d</strong>: generate a single-sentence document description using the full tree.</p>
+          <div class="pipe-tags"><span class="ptag ptag-a">UI state: SUMMARIZING</span><span class="ptag ptag-a">Progress: X / N summaries</span><span class="ptag ptag-r">50 concurrent calls for a 50-node tree</span></div>
+        </div>
+      </div>
+
+      <div class="pipe-step">
+        <div class="pipe-left"><div class="pipe-dot"><span class="pipe-dot-n">09</span></div></div>
+        <div class="pipe-body" style="padding-bottom:0;">
+          <div class="pipe-title">Output <span class="ptag ptag-v">No API calls</span></div>
+          <p class="pipe-desc">Serialize the tree with Jackson <span class="mono">ObjectMapper</span>, write to <span class="mono">results/&lt;filename&gt;_structure.json</span>. The log file is already written incrementally. Shut down the thread pool.</p>
+          <div class="pipe-tags"><span class="ptag ptag-v">No API calls</span><span class="ptag ptag-a">UI state: DONE</span><span class="ptag ptag-g">Thread pool: CPU × 4</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══ MODES ══ -->
+<section id="modes">
+  <div class="wrap">
+    <div class="sh reveal">
+      <div class="eyebrow">03 · Extraction Modes</div>
+      <h2>Three Paths Through Step 4</h2>
+      <p>The path taken depends entirely on what's found during TOC detection. Mode A is fastest and most accurate. Mode C is the fallback when no structure exists upfront.</p>
+    </div>
+
+    <div class="mode-grid reveal">
+      <div class="mode-card mode-a">
+        <div class="mode-header"><div class="mode-label">MODE A</div><div class="mode-sub">TOC exists with page numbers · ~5–15 API calls</div></div>
+        <div class="mode-body">
+          <div class="mode-step"><span class="mstep-n">4A-1</span><span class="mstep-text">Transform TOC text into structured JSON with title, structure code, and page number per entry. If output is cut off by token limit, ask GPT-4o to continue until complete.</span></div>
+          <div class="mode-step"><span class="mstep-n">4A-2</span><span class="mstep-text">Compute physical page offset. The PDF's printed page "1" ≠ physical page 1 in the file. Scan post-TOC pages, match printed numbers to physical positions, find the most common offset, apply to every entry.</span></div>
+          <div class="mode-step"><span class="mstep-n">4A-3</span><span class="mstep-text">Fix null-page entries. For TOC items with no page number (footnotes, appendices), scan surrounding pages and ask GPT-4o to locate them.</span></div>
+        </div>
+      </div>
+      <div class="mode-card mode-b">
+        <div class="mode-header"><div class="mode-label">MODE B</div><div class="mode-sub">TOC exists, no page numbers · ~5–10 API calls</div></div>
+        <div class="mode-body">
+          <div class="mode-step"><span class="mstep-n">4B-1</span><span class="mstep-text">Transform TOC text into structured JSON with title and structure code only — no page field since the TOC has none.</span></div>
+          <div class="mode-step"><span class="mstep-n">4B-2</span><span class="mstep-text">Walk the entire document in token-bounded chunks (default: 20,000 tokens). For each chunk, ask GPT-4o which TOC sections start in this part and on which exact page. Accumulate answers across all chunks.</span></div>
+        </div>
+      </div>
+      <div class="mode-card mode-c">
+        <div class="mode-header"><div class="mode-label">MODE C</div><div class="mode-sub">No TOC found · ~5–10 API calls</div></div>
+        <div class="mode-body">
+          <div class="mode-step"><span class="mstep-n">4C-1</span><span class="mstep-text">Generate structure for the first chunk. Ask GPT-4o to produce a JSON tree showing sections, hierarchy codes (1, 1.1, 1.2, 2…), and physical page start for each section.</span></div>
+          <div class="mode-step"><span class="mstep-n">4C-2</span><span class="mstep-text">Continue structure for each subsequent chunk, passing the prior structure as context. Append new sections to the running list. For a 100-page doc: roughly 5–10 chunk calls total.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="insight ig reveal">
+      <div class="insight-label">⬡ Why Three Modes Matter</div>
+      <p>Each mode has a different accuracy profile. Mode A is most reliable because GPT-4o is given concrete page numbers to verify against. Mode C is most error-prone because GPT-4o must infer structure purely from content — which is why Step 5 (Verification + Auto-Fix) exists as a safety net after all three modes.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══ COMPARE ══ -->
 <section id="compare">
   <div class="wrap">
     <div class="sh reveal">
-      <div class="eyebrow">03 · Head-to-Head</div>
+      <div class="eyebrow">04 · Head-to-Head</div>
       <h2>Vector RAG vs PageIndex</h2>
-      <p>An honest, dimension-by-dimension comparison across what matters for production systems.</p>
+      <p>An honest, dimension-by-dimension comparison. No hype.</p>
     </div>
-    <div class="tbl-wrap reveal">
-      <table>
-        <thead>
-          <tr>
-            <th>Dimension</th>
-            <th>Vector RAG</th>
-            <th>PageIndex</th>
-          </tr>
-        </thead>
+    <div class="wrap-table reveal">
+      <table class="cmp-table">
+        <thead><tr><th>Dimension</th><th>Vector RAG</th><th>PageIndex</th></tr></thead>
         <tbody>
-          <tr>
-            <td>Context at retrieval</td>
-            <td class="cm">Small (top-k chunks)<br><span class="tag ty">~2K–8K tokens</span></td>
-            <td class="cg">Small (bounded nodes)<br><span class="tag tg">configurable max</span></td>
-          </tr>
-          <tr>
-            <td>Index build cost</td>
-            <td class="cg">Cheap — embeddings only<br><span class="tag tg">Fast, one-shot</span></td>
-            <td class="cr">Expensive — many LLM calls<br><span class="tag tr">Front-loaded cost</span></td>
-          </tr>
-          <tr>
-            <td>Retrieval accuracy</td>
-            <td class="cr">Similarity-based<br><span class="tag tr">Similarity ≠ relevance</span></td>
-            <td class="cg">Reasoning-based<br><span class="tag tg">98.7% FinanceBench</span></td>
-          </tr>
-          <tr>
-            <td>Chunking required</td>
-            <td class="cr">Yes — arbitrary splits<br><span class="tag tr">Destroys hierarchy</span></td>
-            <td class="cg">No — natural sections<br><span class="tag tg">Structure preserved</span></td>
-          </tr>
-          <tr>
-            <td>Failure mode</td>
-            <td class="cy">Wrong chunks retrieved<br><span class="tag ty">Silent wrong answers</span></td>
-            <td class="cy">GPT misidentifies structure<br><span class="tag ty">Whole tree corrupted</span></td>
-          </tr>
-          <tr>
-            <td>LLM dependency</td>
-            <td class="cg">Low — final generation only<br><span class="tag tg">Minimal exposure</span></td>
-            <td class="cr">High — entire pipeline<br><span class="tag tr">Every stage uses GPT</span></td>
-          </tr>
-          <tr>
-            <td>Traceability</td>
-            <td class="cr">Black box<br><span class="tag tr">No audit trail</span></td>
-            <td class="cg">Full reasoning path<br><span class="tag tg">Page + section refs</span></td>
-          </tr>
-          <tr>
-            <td>Infrastructure</td>
-            <td class="cy">Vector DB + embedding pipeline<br><span class="tag ty">Separate infra needed</span></td>
-            <td class="cg">JSON tree only<br><span class="tag tg">No vector DB required</span></td>
-          </tr>
-          <tr>
-            <td>Best for</td>
-            <td class="cm">Short docs, semantic search, product recommendations</td>
-            <td class="cm">Long structured docs — financial, legal, technical</td>
-          </tr>
+          <tr><td>Context at retrieval</td><td class="cm">Small (top-k chunks)<br><span class="tag ty">~2K–8K tokens</span></td><td class="cg">Small (bounded nodes)<br><span class="tag tg">max_token configurable</span></td></tr>
+          <tr><td>Index build cost</td><td class="cg">Cheap — embeddings only<br><span class="tag tg">Fast, one-shot</span></td><td class="cr">Expensive — ~133 LLM calls / 100pg<br><span class="tag tr">Front-loaded cost</span></td></tr>
+          <tr><td>Retrieval accuracy</td><td class="cr">Similarity-based<br><span class="tag tr">Similarity ≠ relevance</span></td><td class="cg">Reasoning-based<br><span class="tag tg">98.7% FinanceBench</span></td></tr>
+          <tr><td>Chunking required</td><td class="cr">Yes — arbitrary splits<br><span class="tag tr">Destroys hierarchy</span></td><td class="cg">No — natural sections<br><span class="tag tg">Structure preserved</span></td></tr>
+          <tr><td>Failure mode</td><td class="cy">Wrong chunks retrieved<br><span class="tag ty">Silent wrong answers</span></td><td class="cy">GPT misidentifies structure<br><span class="tag ty">Whole tree corrupted</span></td></tr>
+          <tr><td>LLM dependency</td><td class="cg">Low — final generation only</td><td class="cr">High — 9-step pipeline<br><span class="tag tr">Every stage uses GPT-4o</span></td></tr>
+          <tr><td>Traceability</td><td class="cr">Black box<br><span class="tag tr">No audit trail</span></td><td class="cg">Full JSON audit log<br><span class="tag tg">Page + section refs</span></td></tr>
+          <tr><td>Infrastructure</td><td class="cy">Vector DB + embedding pipeline</td><td class="cg">JSON tree + OpenAI only<br><span class="tag tg">No vector DB required</span></td></tr>
+          <tr><td>Best for</td><td class="cm">Short docs, semantic search, recommendations</td><td class="cm">Long structured docs — financial, legal, technical</td></tr>
         </tbody>
       </table>
     </div>
@@ -763,81 +547,217 @@
 
 <div class="divider"></div>
 
-<!-- ════ TRADEOFFS ════ -->
-<section id="tradeoffs">
+<!-- ══ CONFIG ══ -->
+<section id="config">
   <div class="wrap">
     <div class="sh reveal">
-      <div class="eyebrow">04 · Honest Tradeoffs</div>
-      <h2>What You're Actually Trading</h2>
-      <p>PageIndex is not a free lunch. Understanding the real costs is essential before adopting it in production systems.</p>
+      <div class="eyebrow">05 · Configuration</div>
+      <h2>All 8 Parameters</h2>
+      <p>All parameters are optional with sensible defaults. Override any of them in <span class="mono">config.yaml</span> or pass as CLI arguments.</p>
+    </div>
+    <div class="wrap-table reveal">
+      <table class="cfg-table">
+        <thead><tr><th>Parameter</th><th>Default</th><th>What It Controls</th></tr></thead>
+        <tbody>
+          <tr><td>model</td><td>gpt-4o-2024-11-20</td><td>Which OpenAI model handles every LLM call in the pipeline</td></tr>
+          <tr><td>toc_check_page_num</td><td>20</td><td>How many pages to scan when searching for an existing Table of Contents</td></tr>
+          <tr><td>max_page_num_each_node</td><td>10</td><td>A node spanning more pages than this threshold triggers recursive sub-indexing in Step 7</td></tr>
+          <tr><td>max_token_num_each_node</td><td>20000</td><td>A node with more tokens than this threshold triggers recursive sub-indexing (both conditions must be true)</td></tr>
+          <tr><td>if_add_node_id</td><td>yes</td><td>Assign breadth-first sequential 4-digit IDs ("0001", "0002"…) to every node in Step 8a</td></tr>
+          <tr><td>if_add_node_summary</td><td>yes</td><td>Generate a 2–3 sentence LLM summary per node in Step 8c (concurrent calls)</td></tr>
+          <tr><td>if_add_doc_description</td><td>no</td><td>Generate one sentence describing the entire document in Step 8d (1 extra API call)</td></tr>
+          <tr><td>if_add_node_text</td><td>no</td><td>Include the raw concatenated page text in each node's JSON output (increases file size significantly)</td></tr>
+        </tbody>
+      </table>
     </div>
 
-    <div class="reveal">
-      <h3 style="font-size:.95rem;color:var(--red);margin-bottom:18px;letter-spacing:.02em;font-weight:700;">GPT Dependency — Critically Deep</h3>
-      <div class="dep-grid">
-        <div class="dep-card">
-          <div class="dep-n">01</div>
-          <div>
-            <div class="dep-title">TOC Extraction</div>
-            <p class="dep-body">GPT identifies section boundaries and headings from raw page text. A hallucination here sets the wrong page range for an entire branch of the tree.</p>
-          </div>
-        </div>
-        <div class="dep-card">
-          <div class="dep-n">02</div>
-          <div>
-            <div class="dep-title">Section Verification</div>
-            <p class="dep-body">Parallel async GPT calls validate each detected section. <span class="mono">verify_toc</span> + <span class="mono">fix_incorrect_toc_with_retries</span> logic exists precisely because this fails in practice.</p>
-          </div>
-        </div>
-        <div class="dep-card">
-          <div class="dep-n">03</div>
-          <div>
-            <div class="dep-title">Summary Generation</div>
-            <p class="dep-body">Each node gets an LLM-generated summary. Retrieval reasoning depends entirely on summary quality — garbage in, garbage out.</p>
-          </div>
-        </div>
-        <div class="dep-card">
-          <div class="dep-n">04</div>
-          <div>
-            <div class="dep-title">Retrieval Reasoning</div>
-            <p class="dep-body">At query time, GPT navigates the tree by reading node summaries. Misreading a summary sends the model down the entirely wrong branch.</p>
-          </div>
-        </div>
+    <div class="grid-2 reveal" style="margin-top:32px;">
+      <div class="card">
+        <div class="card-bar bar-a"></div>
+        <div class="chip ca"><span class="chip-dot"></span>Required Input</div>
+        <h3>Exactly One File Path</h3>
+        <p>Provide either <span class="mono">pdf_path</span> pointing to a <span class="mono">.pdf</span> file, or <span class="mono">md_path</span> pointing to a <span class="mono">.md</span> / <span class="mono">.markdown</span> file. Not both. Not neither. File must exist on the local filesystem.</p>
       </div>
-
-      <div class="warn-box">
-        <span class="w-icon">⚠</span>
-        <div class="w-text">
-          <strong>If GPT hallucinates or misidentifies a section start page, the entire tree can be structurally wrong.</strong>
-          The quality ceiling of this system is bounded entirely by how well GPT understands your document's structure.
-        </div>
+      <div class="card">
+        <div class="card-bar bar-g"></div>
+        <div class="chip cg"><span class="chip-dot"></span>Cost Tip</div>
+        <h3>Tune for Your Use Case</h3>
+        <p>Set <span class="mono">if_add_node_summary=no</span> to skip ~50 API calls for large documents. Increase <span class="mono">max_page_num_each_node</span> to prevent deep recursion on documents with very long chapters.</p>
       </div>
-    </div>
-
-    <div class="insight ig reveal" style="margin-top:44px;">
-      <div class="insight-label">⚖ The Core Trade</div>
-      <p>PageIndex trades <strong>cheap indexing + unreliable retrieval</strong> for <strong>expensive indexing + precise retrieval</strong>. Build-time cost is real and significant. The benefit is measurable: reasoning-based navigation finds the <strong>right</strong> section, not just the <strong>similar</strong> one. For high-stakes documents where accuracy outweighs indexing speed — financial filings, legal contracts, technical manuals — that trade is often worth making.</p>
     </div>
   </div>
 </section>
 
 <div class="divider"></div>
 
-<!-- ════ VERDICT ════ -->
+<!-- ══ TRADEOFFS ══ -->
+<section id="tradeoffs">
+  <div class="wrap">
+    <div class="sh reveal">
+      <div class="eyebrow">06 · Honest Tradeoffs</div>
+      <h2>What You're Actually Trading</h2>
+      <p>PageIndex is not a free lunch. Understanding the real costs is essential before adopting it in production.</p>
+    </div>
+
+    <div class="reveal">
+      <h3 style="font-size:.92rem;color:var(--red);margin-bottom:16px;font-weight:700;letter-spacing:.02em;">GPT Dependency — Critically Deep Across 4 Stages</h3>
+      <div class="dep-grid">
+        <div class="dep-card"><div class="dep-n">01</div><div><div class="dep-title">TOC Extraction (Steps 2–4)</div><p class="dep-body">GPT-4o identifies section boundaries, headings, and page numbers from raw page text. A hallucination here sets the wrong page range for an entire branch of the tree — and every downstream node inherits the error.</p></div></div>
+        <div class="dep-card"><div class="dep-n">02</div><div><div class="dep-title">Section Verification (Step 5)</div><p class="dep-body">Concurrent GPT-4o calls validate each detected section start page. <span class="mono">verify_toc</span> + <span class="mono">fix_incorrect_toc_with_retries</span> (<span class="mono">page_index.py:870</span>) exist precisely because this fails in practice and needs up to 3 retry rounds.</p></div></div>
+        <div class="dep-card"><div class="dep-n">03</div><div><div class="dep-title">Summary Generation (Step 8c)</div><p class="dep-body">Each node gets a 2–3 sentence LLM-generated summary. The quality of these summaries is critical — retrieval reasoning navigates the tree using summaries to decide which branch to follow. Garbage summaries → wrong branches.</p></div></div>
+        <div class="dep-card"><div class="dep-n">04</div><div><div class="dep-title">Retrieval Reasoning (Downstream)</div><p class="dep-body">At query time, GPT-4o navigates the tree by reading node summaries. Misreading a summary, or encountering a node whose page range was mis-extracted, sends the model down the entirely wrong branch with high confidence.</p></div></div>
+      </div>
+      <div class="warn-box">
+        <span class="w-icon">⚠</span>
+        <div class="w-text"><strong>If GPT-4o hallucinates a section start page during extraction, the entire tree can be structurally wrong.</strong> The quality ceiling of this system is bounded entirely by how well GPT-4o understands your specific document's structure and layout.</div>
+      </div>
+    </div>
+
+    <div class="insight ig reveal" style="margin-top:40px;">
+      <div class="insight-label">⚖ The Core Trade</div>
+      <p>PageIndex trades <strong>cheap, fast, imprecise retrieval</strong> (vector RAG) for <strong>expensive indexing + precise, reasoning-based retrieval</strong>. The build cost is real: ~133 API calls for a 100-page document. The benefit is measurable: reasoning-based navigation finds the <strong>right</strong> section, not just the <strong>similar</strong> one. For high-stakes, long-form documents — financial filings, legal contracts, technical manuals — where accuracy is more valuable than build speed, that trade is often worth making.</p>
+    </div>
+
+    <!-- API Cost Reference -->
+    <div class="sh reveal" style="margin-top:52px;margin-bottom:20px;">
+      <h3 style="font-size:1rem;font-weight:700;margin-bottom:6px;">API Cost Reference — 100-Page Document, 50 Sections</h3>
+      <p style="font-size:.9rem;">Approximate call counts by step. All concurrent phases complete faster than sequential phases despite the same call count.</p>
+    </div>
+    <div class="cost-grid reveal">
+      <div class="cost-item"><span class="cost-num">~8</span><div class="cost-lbl">TOC Detection</div><div class="cost-desc">Per page, stops at first non-TOC page</div></div>
+      <div class="cost-item"><span class="cost-num">~8</span><div class="cost-lbl">Structure Extraction</div><div class="cost-desc">Depends on page chunk count</div></div>
+      <div class="cost-item"><span class="cost-num">~50</span><div class="cost-lbl">Verification</div><div class="cost-desc">One per section, all concurrent</div></div>
+      <div class="cost-item"><span class="cost-num">~15</span><div class="cost-lbl">Auto-Fix</div><div class="cost-desc">Incorrect items only</div></div>
+      <div class="cost-item"><span class="cost-num">~50</span><div class="cost-lbl">Summaries</div><div class="cost-desc">One per node, all concurrent</div></div>
+      <div class="cost-item"><span class="cost-num">2</span><div class="cost-lbl">TOC Analysis + Doc Desc</div><div class="cost-desc">Single calls each</div></div>
+      <div class="cost-item"><span class="cost-num" style="color:var(--gold);">~133</span><div class="cost-lbl" style="color:var(--gold);">Total</div><div class="cost-desc">GPT-4o pricing applies</div></div>
+      <div class="cost-item"><span class="cost-num" style="color:var(--green);">~94s</span><div class="cost-lbl" style="color:var(--green);">Typical Duration</div><div class="cost-desc">Concurrent phases accelerate wall-clock time</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══ DEVS ══ -->
+<section id="devs">
+  <div class="wrap">
+    <div class="sh reveal">
+      <div class="eyebrow">07 · For Developers</div>
+      <h2>System States &amp; Data Structures</h2>
+      <p>Everything a UI or integration layer needs: all 14 system states, the three key data structures, and the output node schema.</p>
+    </div>
+
+    <!-- States -->
+    <div class="reveal">
+      <div class="eyebrow" style="margin-bottom:16px;">UI States</div>
+      <div class="states-grid">
+        <div class="state-item"><span class="state-id">IDLE</span><div><div class="state-name">Ready</div><div class="state-desc">No job running. Awaiting user input.</div></div></div>
+        <div class="state-item"><span class="state-id">VALIDATING</span><div><div class="state-name">Validating</div><div class="state-desc">Checking file existence, extension, API key. Cannot cancel.</div></div></div>
+        <div class="state-item"><span class="state-id">PARSING</span><div><div class="state-name">Parsing Document</div><div class="state-desc">Extracting text per page with PDFBox. Cannot cancel.</div></div></div>
+        <div class="state-item"><span class="state-id si">TOC_SCANNING</span><div><div class="state-name">Scanning for TOC</div><div class="state-desc">Checking up to 20 pages for TOC. <strong>Can cancel.</strong></div></div></div>
+        <div class="state-item"><span class="state-id">TOC_ANALYZING</span><div><div class="state-name">Analyzing TOC</div><div class="state-desc">Determining TOC type (Mode A/B). Cannot cancel.</div></div></div>
+        <div class="state-item"><span class="state-id si">EXTRACTING</span><div><div class="state-name">Extracting Structure</div><div class="state-desc">Main LLM extraction (Modes A/B/C). <strong>Can cancel.</strong></div></div></div>
+        <div class="state-item"><span class="state-id">VERIFYING</span><div><div class="state-name">Verifying Sections</div><div class="state-desc">Concurrent accuracy check. Shows live accuracy %. Cannot cancel.</div></div></div>
+        <div class="state-item"><span class="state-id">FIXING</span><div><div class="state-name">Correcting Errors</div><div class="state-desc">Auto-fix loop, up to 3 attempts. Cannot cancel.</div></div></div>
+        <div class="state-item"><span class="state-id">TREE_BUILDING</span><div><div class="state-name">Building Tree</div><div class="state-desc">Local computation — flat list to nested tree. Cannot cancel.</div></div></div>
+        <div class="state-item"><span class="state-id">SUB_INDEXING</span><div><div class="state-name">Sub-indexing</div><div class="state-desc">Recursive re-index of large nodes. Concurrent. Cannot cancel.</div></div></div>
+        <div class="state-item"><span class="state-id">SUMMARIZING</span><div><div class="state-name">Generating Summaries</div><div class="state-desc">Concurrent LLM summaries per node. Cannot cancel.</div></div></div>
+        <div class="state-item"><span class="state-id">SAVING</span><div><div class="state-name">Saving Output</div><div class="state-desc">Writing JSON and closing log file. Cannot cancel.</div></div></div>
+        <div class="state-item"><span class="state-id sd">DONE</span><div><div class="state-name">Complete</div><div class="state-desc">Output file ready. Show tree viewer and export button.</div></div></div>
+        <div class="state-item"><span class="state-id se">ERROR</span><div><div class="state-name">Failed</div><div class="state-desc">An error occurred. Show step name, error message, retry option.</div></div></div>
+      </div>
+    </div>
+
+    <!-- Data structures -->
+    <div class="ds-grid reveal" style="margin-top:44px;">
+      <div class="ds-card">
+        <div class="ds-head"><div class="ds-name">RunConfig</div><div class="ds-sub">User-provided before starting a run</div></div>
+        <div class="ds-body">
+          <div class="code-block"><pre>{
+  <span class="k">"inputFile"</span>:         <span class="s">"/path/to/doc.pdf"</span>,
+  <span class="k">"inputType"</span>:         <span class="s">"pdf"</span>,
+  <span class="k">"model"</span>:             <span class="s">"gpt-4o-2024-11-20"</span>,
+  <span class="k">"tocCheckPages"</span>:     <span class="v">20</span>,
+  <span class="k">"maxPagesPerNode"</span>:   <span class="v">10</span>,
+  <span class="k">"maxTokensPerNode"</span>:  <span class="v">20000</span>,
+  <span class="k">"addNodeIds"</span>:        <span class="v">true</span>,
+  <span class="k">"addSummaries"</span>:      <span class="v">true</span>,
+  <span class="k">"addDocDescription"</span>: <span class="v">false</span>,
+  <span class="k">"addRawText"</span>:        <span class="v">false</span>
+}</pre></div>
+        </div>
+      </div>
+      <div class="ds-card">
+        <div class="ds-head"><div class="ds-name">RunStatus</div><div class="ds-sub">Live state polled or subscribed by the UI</div></div>
+        <div class="ds-body">
+          <div class="code-block"><pre>{
+  <span class="k">"state"</span>:        <span class="s">"VERIFYING"</span>,
+  <span class="k">"currentStep"</span>:  <span class="v">5</span>,
+  <span class="k">"totalSteps"</span>:   <span class="v">9</span>,
+  <span class="k">"stepLabel"</span>:    <span class="s">"Verifying sections"</span>,
+  <span class="k">"stepProgress"</span>: { <span class="k">"current"</span>: <span class="v">32</span>, <span class="k">"total"</span>: <span class="v">50</span> },
+  <span class="k">"accuracy"</span>:     <span class="v">0.84</span>,
+  <span class="k">"apiCallsUsed"</span>: <span class="v">67</span>,
+  <span class="k">"elapsedSeconds"</span>: <span class="v">42</span>,
+  <span class="k">"logFile"</span>: <span class="s">"logs/report_20260304.json"</span>
+}</pre></div>
+        </div>
+      </div>
+      <div class="ds-card">
+        <div class="ds-head"><div class="ds-name">RunResult</div><div class="ds-sub">Returned when state reaches DONE</div></div>
+        <div class="ds-body">
+          <div class="code-block"><pre>{
+  <span class="k">"success"</span>:    <span class="v">true</span>,
+  <span class="k">"outputFile"</span>: <span class="s">"results/report_structure.json"</span>,
+  <span class="k">"stats"</span>: {
+    <span class="k">"totalPages"</span>:   <span class="v">87</span>,
+    <span class="k">"totalTokens"</span>:  <span class="v">142350</span>,
+    <span class="k">"totalNodes"</span>:   <span class="v">47</span>,
+    <span class="k">"maxDepth"</span>:     <span class="v">3</span>,
+    <span class="k">"apiCallsUsed"</span>: <span class="v">133</span>,
+    <span class="k">"processingTimeSeconds"</span>: <span class="v">94</span>
+  }
+}</pre></div>
+        </div>
+      </div>
+      <div class="ds-card">
+        <div class="ds-head"><div class="ds-name">TreeNode</div><div class="ds-sub">Every node in the output tree</div></div>
+        <div class="ds-body">
+          <div class="code-block"><pre>{
+  <span class="k">"nodeId"</span>:      <span class="s">"0007"</span>,
+  <span class="k">"title"</span>:       <span class="s">"EBITDA Reconciliation"</span>,
+  <span class="k">"startIndex"</span>:  <span class="v">34</span>,   <span class="c">// first physical page</span>
+  <span class="k">"endIndex"</span>:    <span class="v">41</span>,   <span class="c">// last physical page</span>
+  <span class="k">"summary"</span>:     <span class="s">"Covers adjustments to..."</span>,
+  <span class="k">"depth"</span>:       <span class="v">2</span>,
+  <span class="k">"hasChildren"</span>: <span class="v">false</span>,
+  <span class="k">"children"</span>:    []
+}</pre></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="insight ip reveal" style="margin-top:28px;">
+      <div class="insight-label">⬡ Concurrency Model</div>
+      <p>The thread pool size defaults to <span class="mono">CPU cores × 4</span>. The following operations fire all-at-once rather than sequentially: <strong>verification checks</strong>, <strong>auto-fix corrections</strong>, <strong>summary generation</strong>, <strong>sub-index processing</strong>, and <strong>appear_start checks</strong>. Each concurrent operation is one HTTP call to OpenAI. For the UI: these phases complete faster than their call count suggests, but exact duration depends on OpenAI response time — not document size.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══ VERDICT ══ -->
 <section id="verdict">
   <div class="wrap">
-    <div class="eyebrow reveal" style="justify-content:center;">05 · Bottom Line</div>
+    <div class="eyebrow reveal" style="justify-content:center;">08 · Bottom Line</div>
     <div class="verdict reveal">
       <p class="v-quote">
         PageIndex does <span class="ha">one thing</span> better than vector RAG:<br>
         it retrieves the <span class="ha">right section</span>, not the <span class="hg">similar section</span>.<br>
-        The cost is <span class="hr">deeper LLM dependency</span> at index build time,<br>
+        The cost is <span class="hr">~133 LLM calls per 100 pages</span> at build time,<br>
         with a failure mode that corrupts the entire tree — not just one result.
       </p>
-      <p class="v-sub">
-        Use it when retrieval accuracy matters more than indexing cost.
-        Don't treat it as a drop-in replacement for every RAG use case.
-      </p>
+      <p class="v-sub">Use it for long, structured, high-stakes documents where retrieval accuracy matters more than indexing speed. Don't use it as a drop-in replacement for every RAG use case.</p>
       <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
         <a href="https://github.com/jayant93/PageIndexJ" target="_blank" class="btn-pri">Explore the Code ↗</a>
         <a href="https://github.com/VectifyAI/PageIndex" target="_blank" class="btn-out">Upstream Repo ↗</a>
@@ -846,18 +766,19 @@
   </div>
 </section>
 
-<!-- FOOTER -->
 <footer>
   <div class="wrap">
     <div class="footer-in">
       <div class="f-brand">Page<em>Index</em>J</div>
       <div class="f-links">
         <a href="https://github.com/jayant93/PageIndexJ" target="_blank">GitHub</a>
-        <a href="#concept">Concept</a>
+        <a href="#overview">Overview</a>
+        <a href="#pipeline">Pipeline</a>
         <a href="#compare">Compare</a>
-        <a href="#tradeoffs">Tradeoffs</a>
+        <a href="#config">Config</a>
+        <a href="#devs">For Devs</a>
       </div>
-      <div class="f-copy">Built on PageIndex · VectifyAI · MIT License</div>
+      <div class="f-copy">PageIndexJ v1.0.0 · Built on PageIndex · VectifyAI · MIT License</div>
     </div>
   </div>
 </footer>
@@ -867,89 +788,74 @@
 const H = document.documentElement;
 const tgl = document.getElementById('themeTgl');
 const lbl = document.getElementById('themeLbl');
-
 const saved = localStorage.getItem('pi-theme') || 'light';
 if (saved === 'dark') { H.classList.remove('light'); H.classList.add('dark'); lbl.textContent = 'Dark'; }
-
 tgl.addEventListener('click', () => {
-  const dark = H.classList.toggle('dark');
-  H.classList.toggle('light', !dark);
-  lbl.textContent = dark ? 'Dark' : 'Light';
-  localStorage.setItem('pi-theme', dark ? 'dark' : 'light');
+  const d = H.classList.toggle('dark');
+  H.classList.toggle('light', !d);
+  lbl.textContent = d ? 'Dark' : 'Light';
+  localStorage.setItem('pi-theme', d ? 'dark' : 'light');
 });
 
 /* ── SMOOTH SCROLL ── */
-function scroll(to, ms) {
-  const from = window.scrollY, d = to - from;
-  let t0 = null;
+function scrollTo(to, ms) {
+  const from = window.scrollY, diff = to - from; let t0 = null;
   const ease = t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2;
-  (function s(ts) { if(!t0) t0 = ts; const p = Math.min((ts-t0)/ms,1); window.scrollTo(0, from + d*ease(p)); if(p<1) requestAnimationFrame(s); })(performance.now());
+  (function s(ts) { if(!t0) t0=ts; const p=Math.min((ts-t0)/ms,1); window.scrollTo(0,from+diff*ease(p)); if(p<1) requestAnimationFrame(s); })(performance.now());
 }
 document.querySelectorAll('.nav-links a[href^="#"]').forEach(a => {
   a.addEventListener('click', e => {
     e.preventDefault();
     const t = document.querySelector(a.getAttribute('href'));
-    if(t) scroll(t.getBoundingClientRect().top + window.scrollY - 68, 900);
+    if(t) scrollTo(t.getBoundingClientRect().top + window.scrollY - 68, 900);
   });
 });
 
 /* ── CANVAS ── */
-const cv = document.getElementById('bg-canvas');
-const cx = cv.getContext('2d');
+const cv = document.getElementById('bg-canvas'), cx = cv.getContext('2d');
 let W, H2, nodes = [], mx = -9999, my = -9999;
 const rsz = () => { W = cv.width = innerWidth; H2 = cv.height = innerHeight; };
 rsz(); addEventListener('resize', rsz);
-const init = () => { nodes = []; const n = Math.floor(W*H2/16000); for(let i=0;i<n;i++) nodes.push({x:Math.random()*W,y:Math.random()*H2,vx:(Math.random()-.5)*.28,vy:(Math.random()-.5)*.28,r:Math.random()*1.3+.4,p:Math.random()*6.28}); };
-init(); addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; });
-
+const init = () => { nodes=[]; const n=Math.floor(W*H2/16000); for(let i=0;i<n;i++) nodes.push({x:Math.random()*W,y:Math.random()*H2,vx:(Math.random()-.5)*.28,vy:(Math.random()-.5)*.28,r:Math.random()*1.3+.4,p:Math.random()*6.28}); };
+init(); addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
 (function draw() {
   cx.clearRect(0,0,W,H2);
   const dk = H.classList.contains('dark');
-  const dc = dk ? [0,200,255] : [0,90,180];
-  const mc = dk ? [245,158,11] : [140,80,0];
-  const base = dk ? .3 : .12;
-
-  nodes.forEach(n => {
-    n.x += n.vx; n.y += n.vy;
-    if(n.x<0) n.x=W; if(n.x>W) n.x=0;
-    if(n.y<0) n.y=H2; if(n.y>H2) n.y=0;
-    n.p += .016;
-    const a = (Math.sin(n.p)*.28+.72)*base;
-    cx.beginPath(); cx.arc(n.x,n.y,n.r,0,6.28);
-    cx.fillStyle = `rgba(${dc[0]},${dc[1]},${dc[2]},${a})`; cx.fill();
+  const dc=dk?[0,200,255]:[0,90,180], mc=dk?[245,158,11]:[140,80,0], base=dk?.28:.11;
+  nodes.forEach(n=>{
+    n.x+=n.vx;n.y+=n.vy;
+    if(n.x<0)n.x=W;if(n.x>W)n.x=0;if(n.y<0)n.y=H2;if(n.y>H2)n.y=0;
+    n.p+=.016; const a=(Math.sin(n.p)*.28+.72)*base;
+    cx.beginPath();cx.arc(n.x,n.y,n.r,0,6.28);cx.fillStyle=`rgba(${dc[0]},${dc[1]},${dc[2]},${a})`;cx.fill();
   });
-
-  for(let i=0;i<nodes.length;i++) {
-    for(let j=i+1;j<nodes.length;j++) {
-      const dx=nodes[i].x-nodes[j].x, dy=nodes[i].y-nodes[j].y, d=Math.sqrt(dx*dx+dy*dy);
-      if(d<120) { cx.beginPath(); cx.moveTo(nodes[i].x,nodes[i].y); cx.lineTo(nodes[j].x,nodes[j].y); cx.strokeStyle=`rgba(${dc[0]},${dc[1]},${dc[2]},${(1-d/120)*base*.45})`; cx.lineWidth=.5; cx.stroke(); }
+  for(let i=0;i<nodes.length;i++){
+    for(let j=i+1;j<nodes.length;j++){
+      const dx=nodes[i].x-nodes[j].x,dy=nodes[i].y-nodes[j].y,d=Math.sqrt(dx*dx+dy*dy);
+      if(d<120){cx.beginPath();cx.moveTo(nodes[i].x,nodes[i].y);cx.lineTo(nodes[j].x,nodes[j].y);cx.strokeStyle=`rgba(${dc[0]},${dc[1]},${dc[2]},${(1-d/120)*base*.45})`;cx.lineWidth=.5;cx.stroke();}
     }
-    const mdx=nodes[i].x-mx, mdy=nodes[i].y-my, md=Math.sqrt(mdx*mdx+mdy*mdy);
-    if(md<170) { cx.beginPath(); cx.moveTo(nodes[i].x,nodes[i].y); cx.lineTo(mx,my); cx.strokeStyle=`rgba(${mc[0]},${mc[1]},${mc[2]},${(1-md/170)*.4})`; cx.lineWidth=.8; cx.stroke(); }
+    const mdx=nodes[i].x-mx,mdy=nodes[i].y-my,md=Math.sqrt(mdx*mdx+mdy*mdy);
+    if(md<170){cx.beginPath();cx.moveTo(nodes[i].x,nodes[i].y);cx.lineTo(mx,my);cx.strokeStyle=`rgba(${mc[0]},${mc[1]},${mc[2]},${(1-md/170)*.38})`;cx.lineWidth=.8;cx.stroke();}
   }
   requestAnimationFrame(draw);
 })();
 
 /* ── REVEAL ── */
-const obs = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting){e.target.classList.add('vis'); obs.unobserve(e.target);} }), {threshold:.1});
-document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+const obs = new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vis');obs.unobserve(e.target);}}),{threshold:.08});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 
 /* ── STAT COUNTER ── */
-const sObs = new IntersectionObserver(es => {
-  es.forEach(e => {
-    if(!e.isIntersecting) return;
-    const el = e.target;
-    if(el.id === 'stat-acc') {
-      let v=0; const step=98.7/60;
-      const t = setInterval(()=>{ v=Math.min(v+step,98.7); el.textContent = v>=98.7?'98.7%':v.toFixed(0)+'%'; if(v>=98.7)clearInterval(t); },16);
-    }
+const sObs = new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(!e.isIntersecting)return;
+    const el=e.target;
+    if(el.id==='stat-acc'){let v=0;const st=98.7/60;const t=setInterval(()=>{v=Math.min(v+st,98.7);el.textContent=v>=98.7?'98.7%':v.toFixed(0)+'%';if(v>=98.7)clearInterval(t);},16);}
     sObs.unobserve(el);
   });
 },{threshold:.5});
-document.querySelectorAll('#stat-acc').forEach(el => sObs.observe(el));
+document.querySelectorAll('#stat-acc').forEach(el=>sObs.observe(el));
 
-/* step stagger */
-document.querySelectorAll('.grid-3 .card').forEach((c,i) => c.style.transitionDelay = `${i*.08}s`);
+/* stagger grid cards */
+document.querySelectorAll('.grid-3 .card, .mode-grid .mode-card').forEach((c,i)=>c.style.transitionDelay=`${i*.07}s`);
 </script>
 </body>
 </html>
