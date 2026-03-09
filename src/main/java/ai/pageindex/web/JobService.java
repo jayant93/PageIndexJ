@@ -7,6 +7,10 @@ import ai.pageindex.core.PageIndexMd;
 import ai.pageindex.util.OpenAIClient;
 import ai.pageindex.util.PdfParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.cloud.Timestamp;
+import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.QueryDocumentSnapshot;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -14,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -22,18 +25,19 @@ import java.util.concurrent.*;
 public class JobService {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final String COLLECTION = "indexed_docs";
 
     private final Map<String, IndexJob> jobs = new ConcurrentHashMap<>();
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
-    /** Null when MongoDB is not configured — falls back to re-indexing every time. */
-    private final IndexedDocRepository docRepo;
+    /** Null when Firebase is not configured — falls back to re-indexing every time. */
+    private final Firestore db;
 
     @Autowired
-    public JobService(@Nullable IndexedDocRepository docRepo) {
-        this.docRepo = docRepo;
-        if (docRepo == null) {
-            System.out.println("Warning: MongoDB not available — indexed documents will not be cached");
+    public JobService(@Nullable Firestore db) {
+        this.db = db;
+        if (db == null) {
+            System.out.println("Firebase not configured — indexed documents will not be cached");
         }
     }
 
@@ -79,15 +83,20 @@ public class JobService {
                     }
                 }
 
-                // Check MongoDB cache — skip LLM work if already indexed
-                if (docRepo != null && docRepo.existsByDocKey(docKey)) {
-                    System.out.println("Document already indexed, loading from database: " + docKey);
-                    IndexedDoc existing = docRepo.findByDocKey(docKey).get();
-                    @SuppressWarnings("unchecked")
-                    Map<String, Object> cached = MAPPER.readValue(existing.getStructureJson(), Map.class);
-                    job.setResult(cached);
-                    job.setStatus(IndexJob.Status.DONE);
-                    return;
+                // Check Firestore cache — skip LLM work if already indexed
+                if (db != null) {
+                    DocumentSnapshot snap = db.collection(COLLECTION).document(docKey).get().get();
+                    if (snap.exists()) {
+                        System.out.println("Document already indexed, loading from Firestore: " + docKey);
+                        String cachedJson = snap.getString("structureJson");
+                        if (cachedJson != null) {
+                            @SuppressWarnings("unchecked")
+                            Map<String, Object> cached = MAPPER.readValue(cachedJson, Map.class);
+                            job.setResult(cached);
+                            job.setStatus(IndexJob.Status.DONE);
+                            return;
+                        }
+                    }
                 }
 
                 PageIndexConfig userOpt = new PageIndexConfig();
@@ -123,18 +132,18 @@ public class JobService {
                             opt.ifAddDocDescription, opt.ifAddNodeText, opt.ifAddNodeId);
                 }
 
-                // Persist to MongoDB if available
-                if (docRepo != null) {
-                    String structureJson = MAPPER.writeValueAsString(result);
-                    IndexedDoc doc = new IndexedDoc();
-                    doc.setDocKey(docKey);
-                    doc.setFilename(originalName);
-                    doc.setStructureJson(structureJson);
-                    doc.setPagesJson(pagesJson);
-                    doc.setPageCount(suffix.equals(".pdf") ? PdfParser.getPageCount(tmpFile.toString()) : 0);
-                    doc.setIndexedAt(Instant.now());
-                    docRepo.save(doc);
-                    System.out.println("Index saved to database: " + docKey);
+                // Persist to Firestore if available
+                if (db != null) {
+                    int pageCount = suffix.equals(".pdf") ? PdfParser.getPageCount(tmpFile.toString()) : 0;
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("filename",      originalName);
+                    data.put("docKey",        docKey);
+                    data.put("structureJson", MAPPER.writeValueAsString(result));
+                    data.put("pagesJson",     pagesJson);
+                    data.put("pageCount",     pageCount);
+                    data.put("indexedAt",     Timestamp.now());
+                    db.collection(COLLECTION).document(docKey).set(data);
+                    System.out.println("Index saved to Firestore: " + docKey);
                 }
 
                 job.setResult(result);
@@ -173,35 +182,51 @@ public class JobService {
     public IndexJob getJob(String jobId) { return jobs.get(jobId); }
 
     public List<Map<String, Object>> listIndexedDocs() {
-        if (docRepo == null) return List.of();
-        List<Map<String, Object>> docs = new ArrayList<>();
-        for (IndexedDoc d : docRepo.findAllByOrderByIndexedAtDesc()) {
-            docs.add(Map.of(
-                "docName",   d.getDocKey(),
-                "filename",  d.getFilename(),
-                "pageCount", d.getPageCount(),
-                "indexedAt", d.getIndexedAt() != null ? d.getIndexedAt().toString() : ""
-            ));
+        if (db == null) return List.of();
+        try {
+            List<Map<String, Object>> docs = new ArrayList<>();
+            for (QueryDocumentSnapshot doc : db.collection(COLLECTION)
+                    .orderBy("indexedAt", com.google.cloud.firestore.Query.Direction.DESCENDING)
+                    .get().get().getDocuments()) {
+                String docKey2 = doc.getString("docKey");
+                String filename = doc.getString("filename");
+                Long pageCount = doc.getLong("pageCount");
+                com.google.cloud.Timestamp ts = doc.getTimestamp("indexedAt");
+                docs.add(Map.of(
+                    "docName",   docKey2 != null ? docKey2 : doc.getId(),
+                    "filename",  filename != null ? filename : "",
+                    "pageCount", pageCount != null ? pageCount.intValue() : 0,
+                    "indexedAt", ts != null ? ts.toDate().toString() : ""
+                ));
+            }
+            return docs;
+        } catch (Exception e) {
+            System.out.println("Warning: could not list indexed docs: " + e.getMessage());
+            return List.of();
         }
-        return docs;
     }
 
     @SuppressWarnings("unchecked")
     public Map<String, Object> loadStructure(String docName) throws Exception {
-        if (docRepo == null) throw new IllegalStateException("MongoDB not configured");
-        IndexedDoc doc = docRepo.findByDocKey(docName)
-                .orElseThrow(() -> new IllegalArgumentException("Document not found: " + docName));
-        return MAPPER.readValue(doc.getStructureJson(), Map.class);
+        if (db == null) throw new IllegalStateException("Firebase not configured");
+        DocumentSnapshot snap = db.collection(COLLECTION).document(docName).get().get();
+        if (!snap.exists()) throw new IllegalArgumentException("Document not found: " + docName);
+        String json = snap.getString("structureJson");
+        if (json == null) throw new IllegalArgumentException("Corrupt index for: " + docName);
+        return MAPPER.readValue(json, Map.class);
     }
 
     @SuppressWarnings("unchecked")
     public List<Map<String, Object>> loadPages(String docName) {
-        if (docRepo == null) return List.of();
-        return docRepo.findByDocKey(docName)
-                .map(d -> {
-                    try { return (List<Map<String, Object>>) MAPPER.readValue(d.getPagesJson(), List.class); }
-                    catch (Exception e) { return List.<Map<String, Object>>of(); }
-                })
-                .orElse(List.of());
+        if (db == null) return List.of();
+        try {
+            DocumentSnapshot snap = db.collection(COLLECTION).document(docName).get().get();
+            if (!snap.exists()) return List.of();
+            String pagesJson = snap.getString("pagesJson");
+            if (pagesJson == null) return List.of();
+            return MAPPER.readValue(pagesJson, List.class);
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 }

@@ -76,11 +76,24 @@
             <version>3.0.0</version>
         </dependency>
 
-        <!-- MongoDB (usage tracking + index persistence) -->
+        <!-- Firebase Admin SDK (Firestore — usage tracking + index persistence) -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-mongodb</artifactId>
-            <version>3.2.5</version>
+            <groupId>com.google.firebase</groupId>
+            <artifactId>firebase-admin</artifactId>
+            <version>9.3.0</version>
+            <exclusions>
+                <!-- Avoid Guava version conflict with Spring Boot -->
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- Guava — explicit version to avoid Firebase vs Spring conflict -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>33.1.0-jre</version>
         </dependency>
 
         <!-- Testing -->
