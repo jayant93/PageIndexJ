@@ -32,13 +32,21 @@ public class PageIndex {
      * @return map with "doc_name", optional "doc_description", and "structure"
      */
     public static Map<String, Object> pageIndexMain(String pdfPath, PageIndexConfig opt) throws IOException {
+        if (opt == null) opt = new ConfigLoader().load();
+        OpenAIClient ai = new OpenAIClient(opt.baseUrl, opt.numCtx > 0 ? opt.numCtx : 8192);
+        return pageIndexMain(pdfPath, opt, ai);
+    }
+
+    /**
+     * Full pipeline with a pre-built OpenAIClient (e.g. a rotating free-cloud pool).
+     */
+    public static Map<String, Object> pageIndexMain(String pdfPath, PageIndexConfig opt, OpenAIClient ai) throws IOException {
         // Validate input
         File f = new File(pdfPath);
         if (!f.isFile() || !pdfPath.toLowerCase().endsWith(".pdf")) {
             throw new IllegalArgumentException("Expected a valid PDF file path: " + pdfPath);
         }
 
-        // Merge with defaults
         if (opt == null) opt = new ConfigLoader().load();
 
         JsonLogger logger = new JsonLogger(pdfPath);
@@ -49,7 +57,6 @@ public class PageIndex {
         int totalTokens = pageList.stream().mapToInt(PdfParser.PageEntry::tokenCount).sum();
         logger.info("total_token: " + totalTokens);
 
-        OpenAIClient ai = new OpenAIClient();
         PageIndexPdf indexer = new PageIndexPdf(ai);
 
         // Build the tree
@@ -67,7 +74,6 @@ public class PageIndex {
 
         // Enrich: summaries
         if ("yes".equals(opt.ifAddNodeSummary)) {
-            // Need text for summary generation even if not keeping it
             if (!"yes".equals(opt.ifAddNodeText)) {
                 TreeUtils.addNodeText(structure, pageList);
             }

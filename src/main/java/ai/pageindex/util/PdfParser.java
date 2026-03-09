@@ -52,6 +52,13 @@ public class PdfParser {
         return getPageTokens(pdfPath, "gpt-4o-2024-11-20");
     }
 
+    /** Quick page count without tokenisation — used for free-tier limit checks. */
+    public static int getPageCount(String pdfPath) throws IOException {
+        try (PDDocument doc = Loader.loadPDF(new File(pdfPath))) {
+            return doc.getNumberOfPages();
+        }
+    }
+
     /**
      * Extract text from pages [startPage, endPage] (1-based, inclusive).
      * Mirrors get_text_of_pages in utils.py.

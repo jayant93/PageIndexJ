@@ -14,6 +14,10 @@ public class PageIndexConfig {
     public String ifAddNodeSummary = "yes";
     public String ifAddDocDescription = "no";
     public String ifAddNodeText = "no";
+    /** LLM endpoint URL. Empty = fall back to LLM_BASE_URL env var or OpenAI default. */
+    public String baseUrl = "";
+    /** Ollama context window size. 0 = use OpenAIClient default (8192). */
+    public int numCtx = 0;
 
     public PageIndexConfig() {}
 
@@ -27,5 +31,7 @@ public class PageIndexConfig {
         this.ifAddNodeSummary = base.ifAddNodeSummary;
         this.ifAddDocDescription = base.ifAddDocDescription;
         this.ifAddNodeText = base.ifAddNodeText;
+        this.baseUrl = base.baseUrl;
+        this.numCtx = base.numCtx;
     }
 }

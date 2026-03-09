@@ -1,5 +1,6 @@
 package ai.pageindex.util;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -18,7 +19,10 @@ import java.util.regex.Pattern;
  */
 public class TreeUtils {
 
-    public static final ObjectMapper MAPPER = new ObjectMapper();
+    // Lenient parser: local models (e.g. gemma3:1b) sometimes emit unescaped
+    // control characters (newlines, tabs) inside JSON string values.
+    public static final ObjectMapper MAPPER = new ObjectMapper()
+            .configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
 
     // -------------------------------------------------------------------------
     // JSON extraction helpers (mirrors extract_json, get_json_content)

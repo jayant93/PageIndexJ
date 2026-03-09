@@ -37,6 +37,8 @@ public class PageIndexMain {
         String pdfPath = null;
         String mdPath = null;
         String model = null;
+        String baseUrl = null;
+        Integer numCtx = null;
         Integer tocCheckPages = null;
         Integer maxPagesPerNode = null;
         Integer maxTokensPerNode = null;
@@ -53,6 +55,8 @@ public class PageIndexMain {
                 case "--pdf_path"               -> pdfPath = args[++i];
                 case "--md_path"                -> mdPath = args[++i];
                 case "--model"                  -> model = args[++i];
+                case "--base-url"               -> baseUrl = args[++i];
+                case "--num-ctx"                -> numCtx = Integer.parseInt(args[++i]);
                 case "--toc-check-pages"        -> tocCheckPages = Integer.parseInt(args[++i]);
                 case "--max-pages-per-node"     -> maxPagesPerNode = Integer.parseInt(args[++i]);
                 case "--max-tokens-per-node"    -> maxTokensPerNode = Integer.parseInt(args[++i]);
@@ -92,6 +96,8 @@ public class PageIndexMain {
 
             PageIndexConfig userOpt = new PageIndexConfig();
             if (model != null)              userOpt.model = model;
+            if (baseUrl != null)            userOpt.baseUrl = baseUrl;
+            if (numCtx != null)             userOpt.numCtx = numCtx;
             if (tocCheckPages != null)      userOpt.tocCheckPageNum = tocCheckPages;
             if (maxPagesPerNode != null)    userOpt.maxPageNumEachNode = maxPagesPerNode;
             if (maxTokensPerNode != null)   userOpt.maxTokenNumEachNode = maxTokensPerNode;
@@ -127,6 +133,8 @@ public class PageIndexMain {
 
             PageIndexConfig userOpt = new PageIndexConfig();
             if (model != null)              userOpt.model = model;
+            if (baseUrl != null)            userOpt.baseUrl = baseUrl;
+            if (numCtx != null)             userOpt.numCtx = numCtx;
             if (ifAddNodeSummary != null)   userOpt.ifAddNodeSummary = ifAddNodeSummary;
             if (ifAddDocDescription != null) userOpt.ifAddDocDescription = ifAddDocDescription;
             if (ifAddNodeText != null)      userOpt.ifAddNodeText = ifAddNodeText;
@@ -134,7 +142,7 @@ public class PageIndexMain {
 
             PageIndexConfig opt = new ConfigLoader().load(userOpt);
 
-            OpenAIClient ai = new OpenAIClient();
+            OpenAIClient ai = new OpenAIClient(opt.baseUrl, opt.numCtx > 0 ? opt.numCtx : 8192);
             PageIndexMd mdIndexer = new PageIndexMd(ai);
 
             Map<String, Object> result = mdIndexer.mdToTree(

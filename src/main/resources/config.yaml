@@ -6,3 +6,8 @@ if_add_node_id: "yes"
 if_add_node_summary: "yes"
 if_add_doc_description: "no"
 if_add_node_text: "no"
+# LLM endpoint URL. Empty = use LLM_BASE_URL env var or OpenAI default.
+# Ollama: http://localhost:11434/v1/chat/completions
+base_url: ""
+# Ollama context window size. 0 = use default (8192). Increase for large PDFs (e.g. 16384).
+num_ctx: 0

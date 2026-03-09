@@ -15,7 +15,7 @@ public class ConfigLoader {
     private static final Set<String> KNOWN_KEYS = Set.of(
             "model", "toc_check_page_num", "max_page_num_each_node",
             "max_token_num_each_node", "if_add_node_id", "if_add_node_summary",
-            "if_add_doc_description", "if_add_node_text"
+            "if_add_doc_description", "if_add_node_text", "base_url", "num_ctx"
     );
 
     private final Map<String, Object> defaults;
@@ -54,6 +54,10 @@ public class ConfigLoader {
             cfg.ifAddDocDescription = (String) defaults.get("if_add_doc_description");
         if (defaults.containsKey("if_add_node_text"))
             cfg.ifAddNodeText = (String) defaults.get("if_add_node_text");
+        if (defaults.containsKey("base_url"))
+            cfg.baseUrl = (String) defaults.get("base_url");
+        if (defaults.containsKey("num_ctx"))
+            cfg.numCtx = toInt(defaults.get("num_ctx"));
 
         // Apply user overrides
         if (userOpt != null) {
@@ -65,6 +69,8 @@ public class ConfigLoader {
             if (userOpt.ifAddNodeSummary != null) cfg.ifAddNodeSummary = userOpt.ifAddNodeSummary;
             if (userOpt.ifAddDocDescription != null) cfg.ifAddDocDescription = userOpt.ifAddDocDescription;
             if (userOpt.ifAddNodeText != null) cfg.ifAddNodeText = userOpt.ifAddNodeText;
+            if (userOpt.baseUrl != null && !userOpt.baseUrl.isBlank()) cfg.baseUrl = userOpt.baseUrl;
+            if (userOpt.numCtx > 0) cfg.numCtx = userOpt.numCtx;
         }
 
         return cfg;

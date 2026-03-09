@@ -1,0 +1,9 @@
+.env
+target/
+results/
+*.log
+.git/
+.github/
+.idea/
+*.iml
+TestDoc/

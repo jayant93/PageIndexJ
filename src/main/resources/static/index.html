@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>VectorLess RAG — Reasoning-Based Document Intelligence</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --sky:        #3B9DD2;
+    --sky-mid:    #5BB8E8;
+    --sky-light:  #A8D8F0;
+    --sky-pale:   #E6F5FC;
+    --gold:       #F5C842;
+    --gold-dark:  #D4A017;
+    --gold-pale:  #FFF9DC;
+    --navy:       #1A3F5C;
+    --text:       #1E3A4C;
+    --muted:      #5A7A8C;
+    --surface:    #FFFFFF;
+    --border:     #C2DFF0;
+    --success:    #2E9E6B;
+    --error:      #D94040;
+    --radius:     10px;
+    --shadow:     0 2px 16px rgba(30,80,120,.10);
+  }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: linear-gradient(160deg, #E6F5FC 0%, #FFFBF0 100%);
+    min-height: 100vh;
+  }
+  .header {
+    background: linear-gradient(120deg, #1A5A8C 0%, #2E8FCC 55%, #D4A017 100%);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 3px 12px rgba(0,0,0,.18);
+  }
+  .header-icon { font-size: 32px; filter: drop-shadow(0 2px 4px rgba(0,0,0,.3)); }
+  .header-text h1 { font-size: 20px; font-weight: 700; color: #fff; letter-spacing: -.3px; }
+  .header-text p  { font-size: 12px; color: rgba(255,255,255,.75); margin-top: 2px; }
+  .header-badge {
+    margin-left: auto;
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.3);
+    color: #fff; font-size: 11px; padding: 4px 10px;
+    border-radius: 20px; backdrop-filter: blur(4px);
+  }
+  .main { max-width: 960px; margin: 0 auto; padding: 24px 20px 48px; }
+  .mode-switcher {
+    display: flex; gap: 12px; margin-bottom: 20px;
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 6px; box-shadow: var(--shadow);
+  }
+  .mode-btn {
+    flex: 1; padding: 12px 16px; border: 2px solid transparent;
+    border-radius: 7px; cursor: pointer; font-size: 14px; font-weight: 600;
+    transition: all .18s; display: flex; align-items: center; justify-content: center;
+    gap: 8px; background: transparent;
+  }
+  .mode-btn.active-free {
+    background: linear-gradient(135deg, var(--sky-pale), #EAF8FF);
+    border-color: var(--sky); color: var(--navy);
+    box-shadow: 0 2px 8px rgba(59,157,210,.2);
+  }
+  .mode-btn.active-paid {
+    background: linear-gradient(135deg, var(--gold-pale), #FFFBE8);
+    border-color: var(--gold-dark); color: var(--navy);
+    box-shadow: 0 2px 8px rgba(212,160,23,.2);
+  }
+  .mode-btn.inactive { color: var(--muted); background: #F5F5F5; }
+  .mode-btn.inactive:hover { background: #EAEAEA; }
+  .tier-badge {
+    font-size: 10px; font-weight: 700; padding: 2px 7px;
+    border-radius: 10px; letter-spacing: .5px;
+  }
+  .badge-free { background: var(--sky);      color: #fff; }
+  .badge-soon { background: #999;             color: #fff; }
+  .info-bar {
+    background: linear-gradient(90deg, #EAF7FF, #FFFDE8);
+    border: 1.5px solid var(--sky-light); border-radius: var(--radius);
+    padding: 10px 16px; display: flex; align-items: center;
+    gap: 10px; margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .info-bar .providers { font-size: 12px; color: var(--muted); flex: 1; }
+  .info-bar .providers strong { color: var(--navy); }
+  .usage-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 20px; padding: 4px 12px; font-size: 12px;
+    font-weight: 600; color: var(--navy); white-space: nowrap;
+  }
+  .usage-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); }
+  .usage-dot.warn { background: var(--gold-dark); }
+  .usage-dot.none { background: var(--error); }
+  .card {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow);
+    margin-bottom: 16px; overflow: hidden;
+  }
+  .card-header {
+    padding: 4px 18px 0; border-bottom: 1.5px solid var(--border);
+    background: linear-gradient(90deg, var(--sky-pale), #fff);
+  }
+  .card-body { padding: 18px; }
+  .tabs { display: flex; }
+  .tab-btn {
+    padding: 12px 20px; border: none; background: transparent;
+    cursor: pointer; font-size: 13px; font-weight: 600; color: var(--muted);
+    border-bottom: 2.5px solid transparent; transition: all .15s;
+  }
+  .tab-btn.active { color: var(--sky); border-bottom-color: var(--sky); }
+  .tab-btn:hover:not(.active) { color: var(--navy); }
+  .upload-zone {
+    border: 2px dashed var(--sky-light); border-radius: var(--radius);
+    padding: 32px 20px; text-align: center; cursor: pointer;
+    transition: all .18s; background: var(--sky-pale);
+  }
+  .upload-zone:hover, .upload-zone.drag-over { border-color: var(--sky); background: #D8EFFC; }
+  .upload-zone .icon { font-size: 36px; margin-bottom: 8px; }
+  .upload-zone .hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .upload-zone .filename { margin-top: 8px; font-size: 13px; font-weight: 600; color: var(--sky); word-break: break-all; }
+  .checkbox-row {
+    display: flex; align-items: center; gap: 8px; font-size: 13px;
+    color: var(--text); cursor: pointer; margin-bottom: 8px;
+  }
+  .checkbox-row input[type=checkbox] { accent-color: var(--sky); width: 15px; height: 15px; cursor: pointer; }
+  .btn {
+    padding: 10px 22px; border: none; border-radius: 7px; font-size: 13px;
+    font-weight: 700; cursor: pointer; transition: all .15s;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--gold) 0%, #E8A800 100%);
+    color: var(--navy); box-shadow: 0 2px 8px rgba(212,160,23,.35);
+  }
+  .btn-primary:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-sky {
+    background: linear-gradient(135deg, var(--sky) 0%, #2274A8 100%);
+    color: #fff; box-shadow: 0 2px 8px rgba(59,157,210,.3);
+  }
+  .btn-sky:hover:not(:disabled) { filter: brightness(1.08); }
+  .btn-sky:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--muted); }
+  .btn-outline:hover { border-color: var(--sky); color: var(--sky); }
+  .log-terminal {
+    background: #0D1B2A; border-radius: 7px; padding: 14px;
+    font-family: 'Consolas', 'Courier New', monospace; font-size: 12px;
+    color: #A8D8F0; max-height: 280px; overflow-y: auto; line-height: 1.6;
+  }
+  .log-line { margin-bottom: 2px; }
+  .log-ok   { color: #5DE8A0; }
+  .log-err  { color: #FF6B6B; }
+  .log-warn { color: var(--gold); }
+  .log-dim  { color: #4A6A80; }
+  .cursor { display: inline-block; width: 8px; height: 14px; background: var(--sky-mid); animation: blink .8s step-end infinite; vertical-align: middle; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; font-weight: 700; padding: 3px 10px;
+    border-radius: 20px; letter-spacing: .3px;
+  }
+  .status-pill.running { background: #EAF7FF; color: var(--sky); border: 1px solid var(--sky-light); }
+  .status-pill.done    { background: #EAFFF4; color: var(--success); border: 1px solid #9DECC5; }
+  .status-pill.error   { background: #FFF0F0; color: var(--error);   border: 1px solid #F5AAAA; }
+  .spin { animation: spin .8s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .doc-select {
+    width: 100%; padding: 9px 12px; border: 1.5px solid var(--border);
+    border-radius: 7px; font-size: 13px; color: var(--text);
+    background: var(--surface); outline: none;
+  }
+  .doc-select:focus { border-color: var(--sky); }
+  .question-row { display: flex; gap: 8px; }
+  .question-input {
+    flex: 1; padding: 9px 12px; border: 1.5px solid var(--border);
+    border-radius: 7px; font-size: 13px; color: var(--text);
+    background: var(--surface); outline: none;
+  }
+  .question-input:focus { border-color: var(--sky); }
+  .chat-area { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+  .chat-bubble { padding: 12px 16px; border-radius: 10px; font-size: 13px; line-height: 1.6; }
+  .chat-bubble.user {
+    background: linear-gradient(135deg, var(--sky-pale), #EAF7FF);
+    border: 1.5px solid var(--sky-light);
+    align-self: flex-end; max-width: 85%; color: var(--navy); font-weight: 500;
+  }
+  .chat-bubble.ai {
+    background: var(--surface); border: 1.5px solid var(--border);
+    max-width: 95%; white-space: pre-wrap;
+  }
+  .chat-sources { margin-top: 8px; font-size: 11px; color: var(--muted); }
+  .source-chip {
+    display: inline-block; background: var(--gold-pale);
+    border: 1px solid #E8D88A; color: var(--navy);
+    font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 12px; margin: 2px;
+  }
+  .paid-overlay { position: relative; border-radius: var(--radius); overflow: hidden; }
+  .paid-overlay-mask {
+    position: absolute; inset: 0; background: rgba(255,255,255,.85);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 10px; backdrop-filter: blur(3px); z-index: 10;
+  }
+  .paid-overlay-mask .soon-icon { font-size: 40px; }
+  .paid-overlay-mask h3 { font-size: 18px; font-weight: 700; color: var(--navy); }
+  .paid-overlay-mask p  { font-size: 13px; color: var(--muted); text-align: center; max-width: 300px; }
+  .result-summary {
+    background: linear-gradient(90deg, #EAFFF5, #F0FAFF);
+    border: 1.5px solid #9DECC5; border-radius: 8px; padding: 12px 16px; margin-top: 12px;
+  }
+  .result-summary h4 { font-size: 13px; font-weight: 700; color: var(--success); margin-bottom: 4px; }
+  .result-summary p  { font-size: 12px; color: var(--muted); }
+  .divider { border: none; border-top: 1.5px solid var(--border); margin: 16px 0; }
+  .flex-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .mt8  { margin-top: 8px; }
+  .mt12 { margin-top: 12px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 600px) { .grid2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+function classifyLog(line) {
+  const l = line.toLowerCase();
+  if (l.includes('error') || l.includes('failed') || l.includes('exception')) return 'log-err';
+  if (l.includes('warning') || l.includes('retrying') || l.includes('[pool]')) return 'log-warn';
+  if (l.includes('done') || l.includes('saved') || l.includes('found') || l.includes('success')) return 'log-ok';
+  if (l.startsWith('202') || l.startsWith('[info') || l.startsWith('loading')) return 'log-dim';
+  return '';
+}
+
+function Header() {
+  return (
+    <div className="header">
+      <div className="header-icon">🧠</div>
+      <div className="header-text">
+        <h1>VectorLess Reasoning RAG</h1>
+        <p>Hierarchical document intelligence — no embeddings, no vectors</p>
+      </div>
+      <div className="header-badge">98.7% FinanceBench</div>
+    </div>
+  );
+}
+
+function UsageMeter({ usage }) {
+  const rem = usage != null ? usage.remaining : 2;
+  const dotClass = rem === 0 ? 'none' : rem === 1 ? 'warn' : '';
+  return (
+    <div className="usage-pill">
+      <div className={"usage-dot " + dotClass}/>
+      {rem > 0 ? rem + " / " + (usage ? usage.maxUses : 2) + " uses left" : "Limit reached"}
+    </div>
+  );
+}
+
+function LogTerminal({ lines, running }) {
+  const ref = useRef(null);
+  useEffect(() => { if (ref.current) ref.current.scrollTop = ref.current.scrollHeight; }, [lines]);
+  if (lines.length === 0 && !running) return null;
+  return (
+    <div className="log-terminal" ref={ref}>
+      {lines.map((l, i) => (
+        <div key={i} className={"log-line " + classifyLog(l)}>{l}</div>
+      ))}
+      {running && <div className="log-line log-dim">{"▶ "}<span className="cursor"/></div>}
+    </div>
+  );
+}
+
+function IndexTab({ mode, usage, onUsageUpdate }) {
+  const [file, setFile]               = useState(null);
+  const [drag, setDrag]               = useState(false);
+  const [addSummaries, setAddSummaries] = useState(false);
+  const [addNodeText, setAddNodeText] = useState(false);
+  const [addDocDesc, setAddDocDesc]   = useState(false);
+  const [logs, setLogs]               = useState([]);
+  const [running, setRunning]         = useState(false);
+  const [status, setStatus]           = useState(null);
+  const [errorMsg, setErrorMsg]       = useState('');
+  const fileRef = useRef(null);
+
+  const onDrop = (e) => {
+    e.preventDefault(); setDrag(false);
+    const f = e.dataTransfer.files[0];
+    if (f) setFile(f);
+  };
+
+  const submit = async () => {
+    if (!file) return;
+    setLogs([]); setStatus(null); setErrorMsg(''); setRunning(true);
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('tier', mode);
+    fd.append('addSummaries', addSummaries);
+    fd.append('addNodeText', addNodeText);
+    fd.append('addDocDescription', addDocDesc);
+    fd.append('addNodeId', true);
+    let res;
+    try {
+      res = await fetch('/api/index', { method: 'POST', body: fd }).then(r => r.json());
+    } catch (e) {
+      setErrorMsg('Network error: ' + e.message); setRunning(false); setStatus('error'); return;
+    }
+    if (res.error) {
+      setErrorMsg(res.error); setRunning(false); setStatus('error');
+      onUsageUpdate(); return;
+    }
+    onUsageUpdate();
+    const jobId = res.jobId;
+    const es = new EventSource('/api/events/' + jobId);
+    es.addEventListener('log', e => setLogs(prev => [...prev, e.data]));
+    es.addEventListener('done', e => {
+      es.close(); setRunning(false);
+      setStatus(e.data === 'error' ? 'error' : 'done');
+      onUsageUpdate();
+    });
+    es.onerror = () => { es.close(); setRunning(false); setStatus('error'); };
+  };
+
+  const canSubmit = file && !running && (mode !== 'free' || (usage != null ? usage.remaining : 0) > 0);
+  const maxPages  = mode === 'free' ? (usage ? usage.maxPages : 50) : '∞';
+
+  return (
+    <div>
+      <div
+        className={"upload-zone" + (drag ? " drag-over" : "")}
+        onDragOver={e => { e.preventDefault(); setDrag(true); }}
+        onDragLeave={() => setDrag(false)}
+        onDrop={onDrop}
+        onClick={() => fileRef.current.click()}
+      >
+        <div className="icon">📄</div>
+        <div><strong>Drop your PDF or Markdown here</strong></div>
+        <div className="hint">or click to browse · PDF max {maxPages} pages</div>
+        {file && <div className="filename">{"✓ " + file.name}</div>}
+        <input ref={fileRef} type="file" accept=".pdf,.md,.markdown" style={{display:'none'}}
+               onChange={e => { if (e.target.files[0]) setFile(e.target.files[0]); }}/>
+      </div>
+
+      <div className="mt12">
+        <div className="grid2">
+          <label className="checkbox-row">
+            <input type="checkbox" checked={addSummaries} onChange={e => setAddSummaries(e.target.checked)}/>
+            Add node summaries
+          </label>
+          <label className="checkbox-row">
+            <input type="checkbox" checked={addNodeText} onChange={e => setAddNodeText(e.target.checked)}/>
+            Include node text
+          </label>
+          <label className="checkbox-row">
+            <input type="checkbox" checked={addDocDesc} onChange={e => setAddDocDesc(e.target.checked)}/>
+            Generate doc description
+          </label>
+        </div>
+      </div>
+
+      <hr className="divider"/>
+
+      <div className="flex-row">
+        <button className="btn btn-primary" onClick={submit} disabled={!canSubmit}>
+          {running ? '⏳ Indexing…' : '⚡ Index Document'}
+        </button>
+        {running  && <span className="status-pill running"><span className="spin">◌</span> Processing</span>}
+        {status === 'done'  && <span className="status-pill done">✓ Complete</span>}
+        {status === 'error' && <span className="status-pill error">✗ Failed</span>}
+        {mode === 'free' && usage != null && usage.remaining === 0 && !running && (
+          <span style={{fontSize:12,color:'var(--error)',fontWeight:600}}>⚠ Free limit reached</span>
+        )}
+      </div>
+
+      {errorMsg && (
+        <div className="mt8" style={{color:'var(--error)',fontSize:13,fontWeight:600,lineHeight:1.5}}>
+          {"⚠ " + errorMsg}
+        </div>
+      )}
+
+      {(logs.length > 0 || running) && (
+        <div className="mt12"><LogTerminal lines={logs} running={running}/></div>
+      )}
+
+      {status === 'done' && (
+        <div className="result-summary">
+          <h4>✓ Indexing complete</h4>
+          <p>Document is ready. Switch to the Query tab to ask questions.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function QueryTab({ mode }) {
+  const [docs, setDocs]               = useState([]);
+  const [selectedDoc, setSelectedDoc] = useState('');
+  const [question, setQuestion]       = useState('');
+  const [loading, setLoading]         = useState(false);
+  const [chat, setChat]               = useState([]);
+
+  const loadDocs = () => {
+    fetch('/api/docs').then(r => r.json()).then(d => {
+      setDocs(d);
+      if (d.length > 0 && !selectedDoc) setSelectedDoc(d[0].docName);
+    }).catch(() => {});
+  };
+
+  useEffect(() => { loadDocs(); }, []);
+
+  const ask = async () => {
+    if (!question.trim() || !selectedDoc) return;
+    const q = question.trim();
+    setChat(prev => [...prev, { role:'user', content:q }]);
+    setQuestion(''); setLoading(true);
+    try {
+      const res = await fetch('/api/query', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ docName: selectedDoc, question: q, model: '', numCtx: 8192, tier: mode })
+      }).then(r => r.json());
+      setChat(prev => [...prev, { role:'ai', content: res.answer || '(no answer)', sources: res.sources || [] }]);
+    } catch (e) {
+      setChat(prev => [...prev, { role:'ai', content:'⚠ Error: ' + e.message, sources:[] }]);
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div>
+      {docs.length === 0 ? (
+        <div style={{textAlign:'center',padding:'40px 0',color:'var(--muted)'}}>
+          <div style={{fontSize:40,marginBottom:10}}>📭</div>
+          <div style={{fontWeight:600,marginBottom:4}}>No indexed documents yet</div>
+          <div style={{fontSize:12}}>Go to the Index tab to upload and process a document.</div>
+          <div style={{display:'flex',justifyContent:'center',marginTop:16}}>
+            <button className="btn btn-outline" onClick={loadDocs}>↻ Refresh</button>
+          </div>
+        </div>
+      ) : (
+        <React.Fragment>
+          <div style={{display:'flex',gap:8,marginBottom:14,alignItems:'center'}}>
+            <select className="doc-select" style={{marginBottom:0,flex:1}} value={selectedDoc}
+                    onChange={e => setSelectedDoc(e.target.value)}>
+              {docs.map(d => <option key={d.docName} value={d.docName}>{d.docName}</option>)}
+            </select>
+            <button className="btn btn-outline" style={{padding:'9px 14px',flexShrink:0}} onClick={loadDocs}>↻</button>
+          </div>
+          <div className="question-row">
+            <input
+              className="question-input"
+              placeholder="Ask a question about the document…"
+              value={question}
+              onChange={e => setQuestion(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter' && !loading) ask(); }}
+            />
+            <button className="btn btn-sky" onClick={ask} disabled={loading || !question.trim()}>
+              {loading ? '⏳' : 'Ask ↩'}
+            </button>
+          </div>
+          <div className="chat-area">
+            {chat.map((m, i) => (
+              <div key={i} className={"chat-bubble " + m.role}>
+                {m.content}
+                {m.role === 'ai' && m.sources && m.sources.length > 0 && (
+                  <div className="chat-sources">
+                    Sources: {m.sources.map((s, j) => <span key={j} className="source-chip">{s}</span>)}
+                  </div>
+                )}
+              </div>
+            ))}
+            {loading && (
+              <div className="chat-bubble ai" style={{color:'var(--muted)'}}>
+                <span className="spin">◌</span> Thinking…
+              </div>
+            )}
+          </div>
+        </React.Fragment>
+      )}
+    </div>
+  );
+}
+
+function PaidOverlay() {
+  return (
+    <div className="paid-overlay" style={{minHeight:280}}>
+      <div style={{filter:'blur(2px)',opacity:.25,pointerEvents:'none',padding:24}}>
+        <div style={{height:40,background:'#eee',borderRadius:8,marginBottom:12}}/>
+        <div style={{height:120,background:'#eee',borderRadius:8,marginBottom:12}}/>
+        <div style={{height:40,background:'#eee',borderRadius:8}}/>
+      </div>
+      <div className="paid-overlay-mask">
+        <div className="soon-icon">🔒</div>
+        <h3>Coming Soon</h3>
+        <p>Paid tier with GPT-4o, unlimited pages, and priority processing is in development.</p>
+        <div style={{fontSize:11,color:'var(--muted)',marginTop:4}}>
+          Free tier: up to 50 pages · 2 uses per session
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [mode, setMode]   = useState('free');
+  const [tab, setTab]     = useState('index');
+  const [usage, setUsage] = useState(null);
+
+  const loadUsage = useCallback(() => {
+    fetch('/api/usage').then(r => r.json()).then(setUsage).catch(() => {});
+  }, []);
+
+  useEffect(() => { loadUsage(); }, [loadUsage]);
+
+  return (
+    <div>
+      <Header/>
+      <div className="main">
+
+        <div className="mode-switcher">
+          <button className={"mode-btn " + (mode === 'free' ? 'active-free' : 'inactive')} onClick={() => setMode('free')}>
+            <span className="tier-badge badge-free">FREE</span>
+            Free Tier
+          </button>
+          <button className={"mode-btn " + (mode === 'paid' ? 'active-paid' : 'inactive')} onClick={() => setMode('paid')}>
+            <span className="tier-badge badge-soon">SOON</span>
+            Paid Tier
+          </button>
+        </div>
+
+        {mode === 'free' && (
+          <div className="info-bar">
+            <span style={{fontSize:18}}>⚡</span>
+            <div className="providers">
+              <strong>Auto-distributed across:</strong>{' '}
+              Groq · Cerebras · Mistral · Gemini — rate limits shared automatically
+            </div>
+            <UsageMeter usage={usage}/>
+            <div className="usage-pill" style={{borderColor:'var(--sky-light)',color:'var(--muted)'}}>
+              {"📄 Max " + (usage ? usage.maxPages : 50) + " pages"}
+            </div>
+          </div>
+        )}
+
+        {mode === 'paid' ? (
+          <div className="card">
+            <div className="card-body"><PaidOverlay/></div>
+          </div>
+        ) : (
+          <div className="card">
+            <div className="card-header">
+              <div className="tabs">
+                <button className={"tab-btn " + (tab === 'index' ? 'active' : '')} onClick={() => setTab('index')}>
+                  📤 Index Document
+                </button>
+                <button className={"tab-btn " + (tab === 'query' ? 'active' : '')} onClick={() => setTab('query')}>
+                  💬 Query
+                </button>
+              </div>
+            </div>
+            <div className="card-body">
+              {tab === 'index' && <IndexTab mode={mode} usage={usage} onUsageUpdate={loadUsage}/>}
+              {tab === 'query' && <QueryTab mode={mode}/>}
+            </div>
+          </div>
+        )}
+
+        <div style={{textAlign:'center',fontSize:11,color:'var(--muted)',marginTop:4}}>
+          VectorLess RAG · Reasoning-based document indexing · No vector embeddings required
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

@@ -41,8 +41,12 @@ public class PageIndexPdf {
             String title = (String) item.get("title");
             Object piObj = item.get("physical_index");
             if (piObj == null) {
-                return Map.of("list_index", item.getOrDefault("list_index", -1),
-                        "answer", "no", "title", title, "page_number", (Object) null);
+                Map<String, Object> r = new LinkedHashMap<>();
+                r.put("list_index", item.getOrDefault("list_index", -1));
+                r.put("answer", "no");
+                r.put("title", title);
+                r.put("page_number", null);
+                return r;
             }
             int pageNumber = TreeUtils.toInt(piObj, -1);
             int listIdx = pageNumber - startIndex;
@@ -309,7 +313,7 @@ public class PageIndexPdf {
         int attempts = 0;
         while (attempts < 5) {
             int pos = lastComplete.lastIndexOf('}');
-            if (pos != -1) lastComplete = lastComplete.substring(0, pos + 2);
+            if (pos != -1) lastComplete = lastComplete.substring(0, Math.min(pos + 2, lastComplete.length()));
 
             String continuePrompt = """
                     Your task is to continue the table of contents json structure, directly output the remaining part of the json structure.
@@ -562,10 +566,16 @@ public class PageIndexPdf {
                 + "\nGiven text\n:" + part;
 
         OpenAIClient.CompletionResult result = ai.callWithFinishReason(model, prompt, null);
-        if ("finished".equals(result.finishReason())) {
-            return jsonArrayToList(TreeUtils.extractJson(result.content()));
+        if ("error".equals(result.finishReason())) {
+            System.out.println("generate_toc_init: LLM call failed, returning empty structure");
+            return new ArrayList<>();
         }
-        throw new RuntimeException("finish reason: " + result.finishReason());
+        try {
+            return jsonArrayToList(TreeUtils.extractJson(result.content()));
+        } catch (Exception e) {
+            System.out.println("generate_toc_init: failed to parse response, returning empty structure");
+            return new ArrayList<>();
+        }
     }
 
     /**
@@ -1101,11 +1111,23 @@ public class PageIndexPdf {
 
         List<Map<String, Object>> toc;
         if ("process_toc_with_page_numbers".equals(mode)) {
-            toc = processTocWithPageNumbers(tocContent, tocPageList, pageList,
-                    opt.tocCheckPageNum, opt.model, logger);
+            try {
+                toc = processTocWithPageNumbers(tocContent, tocPageList, pageList,
+                        opt.tocCheckPageNum, opt.model, logger);
+            } catch (Exception e) {
+                System.out.println("process_toc_with_page_numbers failed (" + e.getMessage() + "), falling back to process_toc_no_page_numbers");
+                return metaProcessor(pageList, "process_toc_no_page_numbers",
+                        tocContent, tocPageList, startIndex, opt, logger);
+            }
         } else if ("process_toc_no_page_numbers".equals(mode)) {
-            toc = processTocNoPageNumbers(tocContent, tocPageList, pageList,
-                    startIndex, opt.model, logger);
+            try {
+                toc = processTocNoPageNumbers(tocContent, tocPageList, pageList,
+                        startIndex, opt.model, logger);
+            } catch (Exception e) {
+                System.out.println("process_toc_no_page_numbers failed (" + e.getMessage() + "), falling back to process_no_toc");
+                return metaProcessor(pageList, "process_no_toc",
+                        null, null, startIndex, opt, logger);
+            }
         } else {
             toc = processNoToc(pageList, startIndex, opt.model, logger);
         }
@@ -1119,7 +1141,7 @@ public class PageIndexPdf {
 
         if (vr.accuracy() == 1.0 && vr.incorrectResults().isEmpty()) return toc;
 
-        if (vr.accuracy() > 0.6 && !vr.incorrectResults().isEmpty()) {
+        if (vr.accuracy() > 0.4 && !vr.incorrectResults().isEmpty()) {
             FixResult fr = fixIncorrectTocWithRetries(toc, pageList, vr.incorrectResults(),
                     startIndex, 3, opt.model, logger);
             return fr.toc();
@@ -1133,7 +1155,10 @@ public class PageIndexPdf {
             return metaProcessor(pageList, "process_no_toc",
                     null, null, startIndex, opt, logger);
         }
-        throw new RuntimeException("Processing failed");
+        // All modes exhausted — return best-effort result rather than crashing.
+        // This can happen with small local models that produce low-accuracy output.
+        System.out.println("Warning: verification accuracy " + vr.accuracy() + " below threshold — returning best-effort result");
+        return toc;
     }
 
     // =========================================================================

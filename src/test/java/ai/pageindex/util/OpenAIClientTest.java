@@ -92,6 +92,6 @@ class OpenAIClientTest {
     @Test
     @EnabledIfEnvironmentVariable(named = "CHATGPT_API_KEY", matches = ".+")
     void testClientInitializationWithApiKey() {
-        assertDoesNotThrow(OpenAIClient::new);
+        assertDoesNotThrow((org.junit.jupiter.api.function.Executable) OpenAIClient::new);
     }
 }
