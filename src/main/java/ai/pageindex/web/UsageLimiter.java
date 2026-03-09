@@ -1,13 +1,19 @@
 package ai.pageindex.web;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Tracks free-tier indexing usage per client IP via MongoDB.
- * Limit: 2 indexing jobs per IP, resets automatically after 24 hours (TTL index).
+ * Tracks free-tier usage per client IP.
+ * Uses MongoDB when available (persisted, TTL-based 24h reset).
+ * Falls back to in-memory ConcurrentHashMap when MongoDB is not configured.
  */
 @Component
 public class UsageLimiter {
@@ -16,12 +22,18 @@ public class UsageLimiter {
     public static final int MAX_FREE_PAGES = 50;
 
     private final UsageRepository repo;
+    private final Map<String, AtomicInteger> fallback = new ConcurrentHashMap<>();
 
-    public UsageLimiter(UsageRepository repo) {
+    @Autowired
+    public UsageLimiter(@Nullable UsageRepository repo) {
         this.repo = repo;
+        if (repo == null) {
+            System.out.println("Warning: MongoDB not available — using in-memory usage tracking (resets on restart)");
+        }
     }
 
     public int getUsageCount(String ip) {
+        if (repo == null) return fallback.getOrDefault(ip, new AtomicInteger(0)).get();
         return repo.findById(ip).map(UsageRecord::getCount).orElse(0);
     }
 
@@ -34,13 +46,15 @@ public class UsageLimiter {
     }
 
     public void recordUse(String ip) {
+        if (repo == null) {
+            fallback.computeIfAbsent(ip, k -> new AtomicInteger(0)).incrementAndGet();
+            return;
+        }
         UsageRecord rec = repo.findById(ip).orElse(null);
         if (rec == null) {
-            // First use: create record with 24-hour TTL
             rec = new UsageRecord(ip, 1, Instant.now().plus(1, ChronoUnit.DAYS));
         } else {
             rec.setCount(rec.getCount() + 1);
-            // expiresAt stays at original value — TTL counts from first use
         }
         repo.save(rec);
     }
