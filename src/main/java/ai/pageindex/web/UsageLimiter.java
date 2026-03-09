@@ -2,13 +2,12 @@ package ai.pageindex.web;
 
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 /**
- * Tracks free-tier usage per client IP.
- * Limits: 2 indexing jobs and 50 pages per account (resets on server restart).
+ * Tracks free-tier indexing usage per client IP via MongoDB.
+ * Limit: 2 indexing jobs per IP, resets automatically after 24 hours (TTL index).
  */
 @Component
 public class UsageLimiter {
@@ -16,10 +15,14 @@ public class UsageLimiter {
     public static final int MAX_FREE_USES  = 2;
     public static final int MAX_FREE_PAGES = 50;
 
-    private final Map<String, AtomicInteger> usageMap = new ConcurrentHashMap<>();
+    private final UsageRepository repo;
+
+    public UsageLimiter(UsageRepository repo) {
+        this.repo = repo;
+    }
 
     public int getUsageCount(String ip) {
-        return usageMap.getOrDefault(ip, new AtomicInteger(0)).get();
+        return repo.findById(ip).map(UsageRecord::getCount).orElse(0);
     }
 
     public boolean canUse(String ip) {
@@ -31,6 +34,14 @@ public class UsageLimiter {
     }
 
     public void recordUse(String ip) {
-        usageMap.computeIfAbsent(ip, k -> new AtomicInteger(0)).incrementAndGet();
+        UsageRecord rec = repo.findById(ip).orElse(null);
+        if (rec == null) {
+            // First use: create record with 24-hour TTL
+            rec = new UsageRecord(ip, 1, Instant.now().plus(1, ChronoUnit.DAYS));
+        } else {
+            rec.setCount(rec.getCount() + 1);
+            // expiresAt stays at original value — TTL counts from first use
+        }
+        repo.save(rec);
     }
 }

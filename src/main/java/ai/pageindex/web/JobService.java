@@ -10,9 +10,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -20,13 +20,13 @@ import java.util.concurrent.*;
 public class JobService {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final String RESULTS_DIR = "results";
 
     private final Map<String, IndexJob> jobs = new ConcurrentHashMap<>();
     private final ExecutorService executor = Executors.newCachedThreadPool();
+    private final IndexedDocRepository docRepo;
 
-    public JobService() {
-        new File(RESULTS_DIR).mkdirs();
+    public JobService(IndexedDocRepository docRepo) {
+        this.docRepo = docRepo;
     }
 
     /**
@@ -51,6 +51,7 @@ public class JobService {
         Path tmpFile = Files.createTempFile("pageindexj_", suffix);
         file.transferTo(tmpFile);
 
+        String docKey = originalName.replaceAll("\\.(pdf|md|markdown)$", "");
         boolean isFree = "free".equals(tier);
 
         executor.submit(() -> {
@@ -71,16 +72,25 @@ public class JobService {
                     }
                 }
 
+                // Check if already indexed — skip LLM work and reuse stored result
+                if (docRepo.existsByDocKey(docKey)) {
+                    System.out.println("Document already indexed, loading from database: " + docKey);
+                    IndexedDoc existing = docRepo.findByDocKey(docKey).get();
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> cached = MAPPER.readValue(existing.getStructureJson(), Map.class);
+                    job.setResult(cached);
+                    job.setStatus(IndexJob.Status.DONE);
+                    return;
+                }
+
                 PageIndexConfig userOpt = new PageIndexConfig();
                 OpenAIClient ai;
 
                 if (isFree) {
-                    // Pool mode: distribute calls across Groq/Cerebras/Mistral/Gemini
                     ai = OpenAIClient.freeCloudPool();
                     userOpt.model = "gpt-4o-mini"; // tokenisation reference only
                     userOpt.baseUrl = "";           // not used in pool mode
                 } else {
-                    // Paid / custom model
                     if (model != null && !model.isBlank()) userOpt.model = model;
                     userOpt.baseUrl = ModelRegistry.resolveBaseUrl(model);
                     ai = new OpenAIClient(userOpt.baseUrl, numCtx > 0 ? numCtx : 8192);
@@ -94,9 +104,10 @@ public class JobService {
 
                 PageIndexConfig opt = new ConfigLoader().load(userOpt);
                 Map<String, Object> result;
+                String pagesJson = "[]";
 
                 if (suffix.equals(".pdf")) {
-                    savePageTokens(tmpFile.toString(), opt, originalName);
+                    pagesJson = buildPagesJson(tmpFile.toString(), opt, originalName);
                     result = PageIndex.pageIndexMain(tmpFile.toString(), opt, ai);
                 } else {
                     PageIndexMd mdIndexer = new PageIndexMd(ai);
@@ -105,11 +116,17 @@ public class JobService {
                             opt.ifAddDocDescription, opt.ifAddNodeText, opt.ifAddNodeId);
                 }
 
-                String docKey = originalName.replaceAll("\\.(pdf|md|markdown)$", "");
-                String outPath = RESULTS_DIR + "/" + docKey + "_structure.json";
-                MAPPER.writerWithDefaultPrettyPrinter().writeValue(new File(outPath), result);
-                System.out.println("Parsing done, saving to file...");
-                System.out.println("Tree structure saved to: " + outPath);
+                // Persist to MongoDB
+                String structureJson = MAPPER.writeValueAsString(result);
+                IndexedDoc doc = new IndexedDoc();
+                doc.setDocKey(docKey);
+                doc.setFilename(originalName);
+                doc.setStructureJson(structureJson);
+                doc.setPagesJson(pagesJson);
+                doc.setPageCount(suffix.equals(".pdf") ? PdfParser.getPageCount(tmpFile.toString()) : 0);
+                doc.setIndexedAt(Instant.now());
+                docRepo.save(doc);
+                System.out.println("Index saved to database: " + docKey);
 
                 job.setResult(result);
                 job.setStatus(IndexJob.Status.DONE);
@@ -129,7 +146,7 @@ public class JobService {
         return jobId;
     }
 
-    private void savePageTokens(String pdfPath, PageIndexConfig opt, String originalName) {
+    private String buildPagesJson(String pdfPath, PageIndexConfig opt, String originalName) {
         try {
             System.out.println("Loading page tokens for query support...");
             List<PdfParser.PageEntry> pages = PdfParser.getPageTokens(pdfPath, opt.model);
@@ -137,40 +154,42 @@ public class JobService {
             for (int i = 0; i < pages.size(); i++) {
                 pageList.add(Map.of("index", i, "text", pages.get(i).text()));
             }
-            String docKey = originalName.replaceAll("\\.pdf$", "");
-            MAPPER.writerWithDefaultPrettyPrinter()
-                  .writeValue(new File(RESULTS_DIR + "/" + docKey + "_pages.json"), pageList);
+            return MAPPER.writeValueAsString(pageList);
         } catch (Exception e) {
-            System.out.println("Warning: could not save page tokens: " + e.getMessage());
+            System.out.println("Warning: could not build page tokens: " + e.getMessage());
+            return "[]";
         }
     }
 
     public IndexJob getJob(String jobId) { return jobs.get(jobId); }
 
     public List<Map<String, Object>> listIndexedDocs() {
-        File dir = new File(RESULTS_DIR);
         List<Map<String, Object>> docs = new ArrayList<>();
-        if (!dir.exists()) return docs;
-        for (File f : Objects.requireNonNull(dir.listFiles())) {
-            if (f.getName().endsWith("_structure.json")) {
-                String docName = f.getName().replace("_structure.json", "");
-                docs.add(Map.of("docName", docName, "file", f.getName()));
-            }
+        for (IndexedDoc d : docRepo.findAllByOrderByIndexedAtDesc()) {
+            docs.add(Map.of(
+                "docName",    d.getDocKey(),
+                "filename",   d.getFilename(),
+                "pageCount",  d.getPageCount(),
+                "indexedAt",  d.getIndexedAt() != null ? d.getIndexedAt().toString() : ""
+            ));
         }
         return docs;
     }
 
     @SuppressWarnings("unchecked")
     public Map<String, Object> loadStructure(String docName) throws Exception {
-        File f = new File(RESULTS_DIR + "/" + docName + "_structure.json");
-        if (!f.exists()) throw new IllegalArgumentException("Structure not found: " + docName);
-        return MAPPER.readValue(f, Map.class);
+        IndexedDoc doc = docRepo.findByDocKey(docName)
+                .orElseThrow(() -> new IllegalArgumentException("Document not found: " + docName));
+        return MAPPER.readValue(doc.getStructureJson(), Map.class);
     }
 
     @SuppressWarnings("unchecked")
     public List<Map<String, Object>> loadPages(String docName) {
-        File f = new File(RESULTS_DIR + "/" + docName + "_pages.json");
-        if (!f.exists()) return List.of();
-        try { return MAPPER.readValue(f, List.class); } catch (Exception e) { return List.of(); }
+        return docRepo.findByDocKey(docName)
+                .map(d -> {
+                    try { return (List<Map<String, Object>>) MAPPER.readValue(d.getPagesJson(), List.class); }
+                    catch (Exception e) { return List.<Map<String, Object>>of(); }
+                })
+                .orElse(List.of());
     }
 }
